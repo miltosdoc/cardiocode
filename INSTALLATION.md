@@ -118,7 +118,7 @@ Press Ctrl+C to stop it.
 
 ## Step 6: Configure Your Editor
 
-The editor needs to use the Python from your virtual environment.
+The editor needs to know where CardioCode is installed.
 
 ### Find your venv Python path
 
@@ -135,6 +135,48 @@ Example output: `/Users/yourname/cardiocode/venv/bin/python`
 echo %cd%\venv\Scripts\python.exe
 ```
 Example output: `C:\Users\yourname\cardiocode\venv\Scripts\python.exe`
+
+### For OpenCode (Global - works in any project)
+
+Create the global config file:
+
+**macOS:**
+```bash
+mkdir -p ~/.config/opencode
+cat > ~/.config/opencode/opencode.json << 'EOF'
+{
+  "$schema": "https://opencode.ai/config.json",
+  "mcp": {
+    "cardiocode": {
+      "type": "local",
+      "command": ["/Users/YOURUSERNAME/cardiocode/venv/bin/python", "-m", "cardiocode.mcp.server"],
+      "enabled": true
+    }
+  }
+}
+EOF
+```
+
+**Windows (PowerShell):**
+```powershell
+mkdir -Force "$env:USERPROFILE\.config\opencode"
+@'
+{
+  "$schema": "https://opencode.ai/config.json",
+  "mcp": {
+    "cardiocode": {
+      "type": "local",
+      "command": ["C:\\Users\\YOURUSERNAME\\cardiocode\\venv\\Scripts\\python.exe", "-m", "cardiocode.mcp.server"],
+      "enabled": true
+    }
+  }
+}
+'@ | Out-File -FilePath "$env:USERPROFILE\.config\opencode\opencode.json" -Encoding UTF8
+```
+
+**Important:** Replace `YOURUSERNAME` with your actual username.
+
+After creating the config, restart OpenCode. CardioCode tools will be available in any project.
 
 ### For Claude Desktop
 
@@ -168,35 +210,26 @@ Example output: `C:\Users\yourname\cardiocode\venv\Scripts\python.exe`
 }
 ```
 
-### For OpenCode
+---
 
-Add to `opencode.json` in the cardiocode folder:
+## Step 7: Process Your Guidelines (First Time)
 
-**macOS:**
-```json
-{
-  "mcp": {
-    "cardiocode": {
-      "type": "local",
-      "command": ["/Users/YOURUSERNAME/cardiocode/venv/bin/python", "-m", "cardiocode.mcp.server"],
-      "enabled": true
-    }
-  }
-}
-```
+After configuring your editor, you need to extract the guideline content:
 
-**Windows:**
-```json
-{
-  "mcp": {
-    "cardiocode": {
-      "type": "local",
-      "command": ["C:\\Users\\YOURUSERNAME\\cardiocode\\venv\\Scripts\\python.exe", "-m", "cardiocode.mcp.server"],
-      "enabled": true
-    }
-  }
-}
-```
+1. Open your editor (OpenCode, Claude Desktop, etc.)
+2. Call the `process_pdfs` tool to extract content from PDFs in `source_pdfs/`
+3. This only needs to be done once (or when you add new PDFs)
+
+The extracted knowledge is stored locally and will be available for all future searches.
+
+**Available tools after setup:**
+- `process_pdfs` - Extract content from guideline PDFs
+- `search_knowledge` - Search guideline content
+- `get_chapter` - Get full chapter text
+- `calculate_cha2ds2_vasc` - CHA2DS2-VASc score
+- `calculate_has_bled` - HAS-BLED score
+- `assess_aortic_stenosis` - AS severity assessment
+- And more...
 
 ---
 
