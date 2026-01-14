@@ -1,9 +1,0 @@
-{
-  "mcpServers": {
-    "cardiocode": {
-      "command": "python3.11",
-      "args": ["-m", "cardiocode.mcp.server"],
-      "cwd": "/Users/meditalks/Desktop/cardiocode"
-    }
-  }
-}
