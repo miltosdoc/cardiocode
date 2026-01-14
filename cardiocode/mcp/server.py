@@ -59,7 +59,7 @@ else:
                 }
             
         async def run(self, read_stream, write_stream):
-            await write_stream(json.dumps({
+            await write_stream.write(json.dumps({
                 "fallback_mode": not MCP_AVAILABLE,
                 "mcp_missing": not MCP_AVAILABLE,
                 "message": "MCP server running in fallback mode" if not MCP_AVAILABLE else "MCP server running with full functionality"

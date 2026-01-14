@@ -5,29 +5,43 @@ CardioCode is a comprehensive cardiology decision support system that encodes Eu
 ## 🚀 Quick Start
 
 ### 📋 Prerequisites
-- **Python 3.8+** required
-- **MCP Package**: `pip install --user 'mcp>=1.0.0'` (for full functionality)
-- **PyMuPDF**: `pip install pymupdf` (for PDF processing)
+- **Python 3.10+** required (MCP package requirement)
+- **MCP Package**: `python3.10+ -m pip install --user 'mcp>=1.0.0'`
+- **PyMuPDF**: `python3.10+ -m pip install pymupdf`
 
 ### 🔧 Installation (Cross-Platform)
 
-#### Method 1: Easy Install
+#### Method 1: Easy Install (Recommended)
 ```bash
 # Clone repository
 git clone https://github.com/miltosdoc/cardiocode.git
 cd cardiocode
 
-# Install dependencies
-pip install --user cardiocode pymupdf 'mcp>=1.0.0'
+# Install dependencies (use Python 3.10+)
+python3.11 -m pip install --user pymupdf 'mcp>=1.0.0'
+
+# Install CardioCode in development mode
+python3.11 -m pip install --user -e .
 
 # Start MCP server
-python3 -m cardiocode.mcp.server
+python3.11 -m cardiocode.mcp.server
 ```
 
 #### Method 2: Development Install
 ```bash
 # For development/contribution
-pip install -e .
+python3.11 -m pip install --user -e .
+```
+
+#### Method 3: Check Python Version First
+```bash
+# Check your Python versions
+which python3
+which python3.10
+which python3.11
+
+# Install with correct Python version
+python3.11 -m pip install --user pymupdf 'mcp>=1.0.0'
 ```
 
 #### Method 3: Windows Specific
