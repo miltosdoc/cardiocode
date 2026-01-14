@@ -11,12 +11,14 @@ Clinical decision support system that encodes ESC (European Society of Cardiolog
 ```bash
 git clone https://github.com/miltosdoc/cardiocode.git
 cd cardiocode
-python3 -m pip install --user pymupdf mcp
-python3 -m pip install --user -e .
-python3 -m cardiocode.mcp.server
+python3 -m venv venv
+source venv/bin/activate
+pip install pymupdf mcp
+pip install -e .
+python -m cardiocode.mcp.server
 ```
 
-On Windows, use `python` instead of `python3`.
+On Windows, use `python` instead of `python3`, and `venv\Scripts\activate` instead of `source venv/bin/activate`.
 
 ## MCP Server Configuration
 
@@ -31,7 +33,7 @@ Add to your Claude Desktop config:
 {
   "mcpServers": {
     "cardiocode": {
-      "command": "python3",
+      "command": "/path/to/cardiocode/venv/bin/python",
       "args": ["-m", "cardiocode.mcp.server"],
       "cwd": "/path/to/cardiocode"
     }
@@ -39,9 +41,7 @@ Add to your Claude Desktop config:
 }
 ```
 
-### VS Code / Cursor / Windsurf
-
-Add to your editor's MCP settings (same format as above).
+Use the full path to the Python in your virtual environment. See [INSTALLATION.md](INSTALLATION.md) for details.
 
 ### OpenCode
 
@@ -51,7 +51,7 @@ Add to `opencode.json`:
   "mcp": {
     "cardiocode": {
       "type": "local",
-      "command": ["python3", "-m", "cardiocode.mcp.server"],
+      "command": ["/path/to/cardiocode/venv/bin/python", "-m", "cardiocode.mcp.server"],
       "enabled": true
     }
   }

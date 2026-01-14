@@ -70,41 +70,71 @@ git clone https://github.com/miltosdoc/cardiocode.git
 cd cardiocode
 ```
 
+If you already have it, just update:
+```bash
+cd cardiocode
+git pull
+```
+
 ---
 
-## Step 4: Install CardioCode
+## Step 4: Create Virtual Environment and Install
+
+Modern Python requires a virtual environment. This keeps CardioCode's packages separate from your system.
 
 **macOS:**
 ```bash
-python3 -m pip install --user pymupdf mcp
-python3 -m pip install --user -e .
+python3 -m venv venv
+source venv/bin/activate
+pip install pymupdf mcp
+pip install -e .
 ```
 
 **Windows:**
 ```
-python -m pip install --user pymupdf mcp
-python -m pip install --user -e .
+python -m venv venv
+venv\Scripts\activate
+pip install pymupdf mcp
+pip install -e .
 ```
+
+You'll see `(venv)` at the start of your prompt when the environment is active.
 
 ---
 
 ## Step 5: Test the Installation
 
-**macOS:**
-```bash
-python3 -m cardiocode.mcp.server
-```
+With your virtual environment active (you should see `(venv)` in your prompt):
 
-**Windows:**
-```
+```bash
 python -m cardiocode.mcp.server
 ```
 
-You should see output indicating the server started. Press Ctrl+C to stop it.
+You should see: `CardioCode MCP Server started`
+
+Press Ctrl+C to stop it.
 
 ---
 
 ## Step 6: Configure Your Editor
+
+The editor needs to use the Python from your virtual environment.
+
+### Find your venv Python path
+
+**macOS:**
+```bash
+# From inside the cardiocode folder:
+echo "$(pwd)/venv/bin/python"
+```
+Example output: `/Users/yourname/cardiocode/venv/bin/python`
+
+**Windows:**
+```
+# From inside the cardiocode folder:
+echo %cd%\venv\Scripts\python.exe
+```
+Example output: `C:\Users\yourname\cardiocode\venv\Scripts\python.exe`
 
 ### For Claude Desktop
 
@@ -112,14 +142,12 @@ You should see output indicating the server started. Press Ctrl+C to stop it.
 
 **Windows:** Edit `%APPDATA%\Claude\claude_desktop_config.json`
 
-Add this configuration (replace the path with your actual cardiocode folder):
-
 **macOS example:**
 ```json
 {
   "mcpServers": {
     "cardiocode": {
-      "command": "python3",
+      "command": "/Users/YOURUSERNAME/cardiocode/venv/bin/python",
       "args": ["-m", "cardiocode.mcp.server"],
       "cwd": "/Users/YOURUSERNAME/cardiocode"
     }
@@ -132,7 +160,7 @@ Add this configuration (replace the path with your actual cardiocode folder):
 {
   "mcpServers": {
     "cardiocode": {
-      "command": "python",
+      "command": "C:\\Users\\YOURUSERNAME\\cardiocode\\venv\\Scripts\\python.exe",
       "args": ["-m", "cardiocode.mcp.server"],
       "cwd": "C:\\Users\\YOURUSERNAME\\cardiocode"
     }
@@ -140,77 +168,100 @@ Add this configuration (replace the path with your actual cardiocode folder):
 }
 ```
 
-### For VS Code / Cursor / Windsurf
-
-Add to your editor's MCP settings (same JSON format as above).
-
 ### For OpenCode
 
-Add to `opencode.json`:
+Add to `opencode.json` in the cardiocode folder:
+
+**macOS:**
 ```json
 {
   "mcp": {
     "cardiocode": {
       "type": "local",
-      "command": ["python3", "-m", "cardiocode.mcp.server"],
+      "command": ["/Users/YOURUSERNAME/cardiocode/venv/bin/python", "-m", "cardiocode.mcp.server"],
       "enabled": true
     }
   }
 }
 ```
 
-On Windows, use `"python"` instead of `"python3"`.
+**Windows:**
+```json
+{
+  "mcp": {
+    "cardiocode": {
+      "type": "local",
+      "command": ["C:\\Users\\YOURUSERNAME\\cardiocode\\venv\\Scripts\\python.exe", "-m", "cardiocode.mcp.server"],
+      "enabled": true
+    }
+  }
+}
+```
 
 ---
 
 ## Troubleshooting
 
-### "python not found" or "python3 not found"
+### "externally-managed-environment" error
 
-- **Windows:** Reinstall Python and make sure to check "Add Python to PATH"
-- **macOS:** Try `python3.11` instead of `python3`
+This means you need to use a virtual environment (Step 4). Don't use `--user` flag with Homebrew Python.
 
-### "pip not found"
+### "command not found: python3"
 
-Use `python -m pip` instead of just `pip`:
-```bash
-python3 -m pip install --user pymupdf mcp
-```
+- **macOS with Homebrew:** Try `python3.11` or `/opt/homebrew/bin/python3`
+- **Windows:** Reinstall Python and check "Add Python to PATH"
 
-### "Permission denied"
+### "No module named 'cardiocode'"
 
-Add the `--user` flag to pip commands:
-```bash
-python3 -m pip install --user pymupdf mcp
-```
+Make sure you:
+1. Activated the virtual environment: `source venv/bin/activate` (macOS) or `venv\Scripts\activate` (Windows)
+2. Ran `pip install -e .` from inside the cardiocode folder
 
-### "ModuleNotFoundError: No module named 'cardiocode'"
+### Server crashes or shows errors
 
-Make sure you ran the install command from inside the cardiocode folder:
+1. Make sure virtual environment is active
+2. Check packages: `pip list | grep -E "mcp|pymupdf"`
+3. Reinstall: `pip install --force-reinstall pymupdf mcp`
+
+### Editor can't find the server
+
+Make sure you're using the full path to the venv Python, not just `python3`.
+
+---
+
+## Daily Usage
+
+To work with CardioCode later:
+
+**macOS:**
 ```bash
 cd cardiocode
-python3 -m pip install --user -e .
+source venv/bin/activate
+python -m cardiocode.mcp.server
 ```
 
-### MCP server won't start
-
-1. Check Python version is 3.10+: `python3 --version`
-2. Check packages installed: `python3 -m pip list | grep mcp`
-3. Make sure you're in the cardiocode directory
+**Windows:**
+```
+cd cardiocode
+venv\Scripts\activate
+python -m cardiocode.mcp.server
+```
 
 ---
 
 ## Quick Reference
 
-| Task | macOS | Windows |
+| Step | macOS | Windows |
 |------|-------|---------|
-| Check Python | `python3 --version` | `python --version` |
-| Install packages | `python3 -m pip install --user ...` | `python -m pip install --user ...` |
-| Run server | `python3 -m cardiocode.mcp.server` | `python -m cardiocode.mcp.server` |
+| Create venv | `python3 -m venv venv` | `python -m venv venv` |
+| Activate venv | `source venv/bin/activate` | `venv\Scripts\activate` |
+| Install | `pip install pymupdf mcp && pip install -e .` | Same |
+| Run server | `python -m cardiocode.mcp.server` | Same |
+| Deactivate | `deactivate` | Same |
 
 ---
 
 ## Need Help?
 
 - GitHub Issues: https://github.com/miltosdoc/cardiocode/issues
-- Include your OS, Python version, and the full error message
+- Include your OS, Python version (`python --version`), and the full error message
