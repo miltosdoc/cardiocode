@@ -59,3 +59,7 @@ Thumbs.db
 cache/
 tmp/
 temp/
+
+# Generated knowledge base (re-extract from PDFs)
+cardiocode/knowledge/chapters/
+cardiocode/knowledge/guidelines.json

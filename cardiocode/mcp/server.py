@@ -1,8 +1,7 @@
 """
 CardioCode MCP Server.
 
-Model Context Protocol server implementation for CardioCode.
-Exposes cardiology guideline tools via stdio transport.
+Model Context Protocol server for clinical decision support.
 """
 
 from __future__ import annotations
@@ -10,165 +9,122 @@ import asyncio
 import json
 import logging
 import sys
-from typing import Any, Dict, Optional
-
-try:
-    from mcp.server import Server
-    from mcp.server.stdio import stdio_server
-    from mcp.types import (
-        Tool,
-        TextContent,
-        CallToolResult,
-        ListToolsResult,
-    )
-    MCP_AVAILABLE = True
-except ImportError:
-    # Fallback if MCP package not available
-    print("Warning: MCP package not available. Using fallback implementation.", file=sys.stderr)
-    MCP_AVAILABLE = False
-
-# Import tools
-from cardiocode.mcp.tools import TOOL_REGISTRY, call_tool
+import inspect
+from typing import Any, Dict
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, stream=sys.stderr)
 logger = logging.getLogger("cardiocode-mcp")
 
-# Create MCP server instance
-if MCP_AVAILABLE:
-    server = Server("cardiocode")
+# Try to import MCP
+try:
+    from mcp.server import Server
+    from mcp.server.stdio import stdio_server
+    from mcp.types import Tool, TextContent, CallToolResult
+    MCP_AVAILABLE = True
     logger.info("MCP package loaded successfully")
-else:
-    # Simple fallback server when MCP package is not available
-    class FallbackServer:
-        def __init__(self):
-            self.tools = {"status": "MCP package unavailable - fallback mode"}
-            
-        async def list_tools(self):
-            return {"tools": list(TOOL_REGISTRY.keys())}
-            
-        async def call_tool(self, name: str, arguments: Dict[str, Any]):
-            if name in TOOL_REGISTRY:
-                func = TOOL_REGISTRY[name]["function"]
-                return func(**arguments)
-            else:
-                return {
-                    "error": f"Tool '{name}' not available in fallback mode",
-                    "available_tools": list(TOOL_REGISTRY.keys()),
-                    "message": "Install MCP package for full functionality"
-                }
-            
-        async def run(self, read_stream, write_stream):
-            await write_stream.write(json.dumps({
-                "fallback_mode": not MCP_AVAILABLE,
-                "mcp_missing": not MCP_AVAILABLE,
-                "message": "MCP server running in fallback mode" if not MCP_AVAILABLE else "MCP server running with full functionality"
-            }))
-            return
-    
-    server = FallbackServer()
+except ImportError:
+    MCP_AVAILABLE = False
+    logger.warning("MCP package not available")
 
-def _get_tool_schema(name: str, info: Dict[str, Any]) -> Tool:
-    """Generate tool schema from function metadata."""
-    func = info["function"]
-    
-    # Extract JSON schema from function signature and docstring
-    import inspect
+# Import tools
+from cardiocode.mcp.tools import TOOL_REGISTRY, call_tool
+
+
+def _build_tool_schema(name: str, func) -> Dict[str, Any]:
+    """Build JSON schema from function signature."""
     sig = inspect.signature(func)
     doc = func.__doc__ or ""
     
-    # Parse docstring for Args section
-    properties = {}
-    required = []
-    
-    # Extract parameter descriptions from docstring
+    # Parse docstring for parameter descriptions
     param_docs = {}
     in_args = False
     current_param = None
+    
     for line in doc.split("\n"):
-        line = line.strip()
-        if line.startswith("Args:"):
+        line_stripped = line.strip()
+        if line_stripped.startswith("Args:"):
             in_args = True
             continue
-        if in_args and line.startswith("  ") and ":" in line:
-            # New parameter
-            param_name = line.split(":")[0].strip()
-            param_desc = line.split(":", 1)[1].strip()
-            param_docs[param_name] = param_desc
-            current_param = param_name
-        elif in_args and line.startswith("    ") and current_param:
-            # Continuation of parameter description
-            param_docs[current_param] += " " + line.strip()
+        if line_stripped.startswith("Returns:"):
+            in_args = False
+            continue
+        if in_args and ":" in line_stripped:
+            parts = line_stripped.split(":", 1)
+            if len(parts) == 2:
+                param_name = parts[0].strip()
+                param_desc = parts[1].strip()
+                param_docs[param_name] = param_desc
+                current_param = param_name
+        elif in_args and current_param and line_stripped:
+            param_docs[current_param] += " " + line_stripped
     
-    # Build JSON schema from function signature
+    # Build properties from signature
+    properties = {}
+    required = []
+    
     for param_name, param in sig.parameters.items():
-        param_type = "string"
-        if param.annotation == int:
-            param_type = "integer"
-        elif param.annotation == float:
-            param_type = "number"
-        elif param.annotation == bool:
-            param_type = "boolean"
+        param_schema = {"type": "string"}  # MCP sends everything as strings
         
-        param_schema = {"type": param_type}
-        
-        # Add description if available
         if param_name in param_docs:
             param_schema["description"] = param_docs[param_name]
         
-        # Handle optional parameters
         if param.default == inspect.Parameter.empty:
             required.append(param_name)
-        else:
-            param_schema["default"] = param.default
+        elif param.default is not None:
+            param_schema["default"] = str(param.default)
         
         properties[param_name] = param_schema
     
-    return Tool(
-        name=name,
-        description=doc.split("\n")[0] if doc else f"CardioCode tool: {name}",
-        inputSchema={
+    return {
+        "name": name,
+        "description": doc.split("\n")[0].strip() if doc else f"CardioCode tool: {name}",
+        "inputSchema": {
             "type": "object",
             "properties": properties,
             "required": required,
-        },
-    )
+        }
+    }
+
 
 if MCP_AVAILABLE:
+    # Create MCP server
+    server = Server("cardiocode")
+    
     @server.list_tools()
-    async def list_tools() -> ListToolsResult:
-        """List all available CardioCode tools."""
+    async def list_tools():
+        """List all available tools."""
         tools = []
-        
         for name, info in TOOL_REGISTRY.items():
-            tool = _get_tool_schema(name, info)
-            tools.append(tool)
-        
-        return ListToolsResult(tools=tools)
-
+            schema = _build_tool_schema(name, info["function"])
+            tools.append(Tool(
+                name=schema["name"],
+                description=schema["description"],
+                inputSchema=schema["inputSchema"],
+            ))
+        return tools
+    
     @server.call_tool()
-    async def call_tool_handler(name: str, arguments: Dict[str, Any]) -> CallToolResult:
+    async def handle_call_tool(name: str, arguments: Dict[str, Any]):
         """Handle tool calls."""
         try:
-            result = call_tool(name, arguments)
+            result = call_tool(name, arguments or {})
             
-            if isinstance(result, dict) and "error" in result:
-                return CallToolResult(
-                    content=[TextContent(type="text", text=f"Error: {result['error']}")]
-                )
+            # Convert result to JSON string
+            if isinstance(result, dict):
+                result_text = json.dumps(result, indent=2, ensure_ascii=False)
+            else:
+                result_text = str(result)
             
-            return CallToolResult(
-                content=[TextContent(type="text", text=str(result))]
-            )
+            return [TextContent(type="text", text=result_text)]
             
         except Exception as e:
-            logger.error(f"Error calling tool {name}: {e}")
-            return CallToolResult(
-                content=[TextContent(type="text", text=f"Error: {str(e)}")]
-            )
+            logger.error(f"Error calling {name}: {e}")
+            return [TextContent(type="text", text=json.dumps({"error": str(e)}))]
+
 
 async def main():
-    """Main server entry point."""
+    """Main entry point."""
     if MCP_AVAILABLE:
         async with stdio_server() as (read_stream, write_stream):
             await server.run(
@@ -177,13 +133,18 @@ async def main():
                 server.create_initialization_options()
             )
     else:
-        # Fallback mode
-        import sys
-        await server.run(sys.stdin, sys.stdout)
+        # Fallback: print tools and exit
+        print(json.dumps({
+            "status": "MCP not available",
+            "available_tools": list(TOOL_REGISTRY.keys()),
+            "message": "Install MCP: pip install mcp"
+        }))
+
 
 def serve():
-    """Serve function for module import."""
+    """Entry point for module execution."""
     asyncio.run(main())
+
 
 if __name__ == "__main__":
     serve()
