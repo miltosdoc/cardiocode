@@ -2,47 +2,22 @@
 
 CardioCode is a comprehensive cardiology decision support system that encodes European Society of Cardiology (ESC) clinical guidelines as executable Python code. Perfect for clinicians, researchers, and AI assistants.
 
-## 🚀 Quick Start
+## 🚀 Installation
 
-### 📋 Prerequisites
-- **Python 3.10+** required (MCP package requirement)
-- **MCP Package**: `python3.10+ -m pip install --user 'mcp>=1.0.0'`
-- **PyMuPDF**: `python3.10+ -m pip install pymupdf`
+**🎯 NEW USERS: Start with the [Universal Installation Guide](INSTALLATION.md)** - Works for macOS, Linux, Windows with step-by-step Python setup and troubleshooting for all skill levels.
 
-### 🔧 Installation (Cross-Platform)
+### Quick Install (Advanced Users)
+If you're comfortable with Python and have Python 3.10+:
 
-#### Method 1: Easy Install (Recommended)
 ```bash
-# Clone repository
 git clone https://github.com/miltosdoc/cardiocode.git
 cd cardiocode
-
-# Install dependencies (use Python 3.10+)
 python3.11 -m pip install --user pymupdf 'mcp>=1.0.0'
-
-# Install CardioCode in development mode
 python3.11 -m pip install --user -e .
-
-# Start MCP server
 python3.11 -m cardiocode.mcp.server
 ```
 
-#### Method 2: Development Install
-```bash
-# For development/contribution
-python3.11 -m pip install --user -e .
-```
-
-#### Method 3: Check Python Version First
-```bash
-# Check your Python versions
-which python3
-which python3.10
-which python3.11
-
-# Install with correct Python version
-python3.11 -m pip install --user pymupdf 'mcp>=1.0.0'
-```
+**🎯 FIRST TIME USERS?** Use the [Universal Installation Guide](INSTALLATION.md) for step-by-step setup with Python installation and troubleshooting for all platforms.
 
 #### Method 3: Windows Specific
 ```cmd
@@ -281,6 +256,31 @@ The system includes all ESC guideline PDFs (2019-2024) in `source_pdfs/` with au
 ## 📄 License
 
 MIT License - Free for clinical and research use
+
+## 🆘 Getting Help
+
+### 🎯 First-Time Installation
+- **Universal Guide**: [INSTALLATION.md](INSTALLATION.md) - Step-by-step for all platforms
+- **Common Issues**: Python version conflicts, MCP package requirements
+- **Platform Support**: macOS, Linux, Windows covered
+
+### 🔧 Installation Problems
+1. Check Python version: `python3.11 --version` (must be 3.10+)
+2. Check packages: `python3.11 -m pip list | grep -E "(mcp|pymupdf)"`
+3. Test import: `python3.11 -c "import cardiocode.mcp.server"`
+4. Update: `git pull origin main && python3.11 -m pip install --user -e .`
+
+### 💬 Community Support
+- **Issues**: https://github.com/miltosdoc/cardiocode/issues
+- **Discussions**: https://github.com/miltosdoc/cardiocode/discussions
+- **Installation Help**: Comment on existing issues or start new discussion
+
+### 📧 Direct Support
+Include:
+- Your OS (macOS/Linux/Windows + version)
+- Python version: `python --version`
+- Error message (full output)
+- Steps you've tried
 
 ## 🌟 GitHub Repository
 
