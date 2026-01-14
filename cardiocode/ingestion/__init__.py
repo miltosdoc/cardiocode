@@ -1,22 +1,26 @@
 """
 CardioCode PDF Ingestion and Knowledge Expansion System.
 
-This module provides tools to:
-1. Monitor for new PDF guidelines
-2. Extract structured content from PDFs
-3. Generate code templates for new guidelines
-4. Track knowledge updates and versioning
+DEPRECATED: This module is superseded by cardiocode.knowledge.extractor.
+Use cardiocode_process_pdfs() MCP tool or:
 
-Usage:
-    from cardiocode.ingestion import GuidelineWatcher, process_new_pdf
-    
-    # Start watching for new PDFs
-    watcher = GuidelineWatcher("source_pdfs/")
-    watcher.start()
-    
-    # Or process a single PDF
-    result = process_new_pdf("source_pdfs/new_guideline.pdf")
+    from cardiocode.knowledge.extractor import process_all_pdfs
+    process_all_pdfs()
+
+The new system:
+- Stores extracted knowledge in cardiocode/knowledge/chapters/
+- Uses cardiocode/knowledge/guidelines.json as the index
+- Is cross-platform compatible (no Windows path issues)
+- Is connected to MCP tools (search_knowledge, get_chapter, etc.)
+
+This module is kept for backward compatibility but may be removed in future versions.
 """
+import warnings
+warnings.warn(
+    "cardiocode.ingestion is deprecated. Use cardiocode.knowledge.extractor instead.",
+    DeprecationWarning,
+    stacklevel=2
+)
 
 from cardiocode.ingestion.pdf_watcher import GuidelineWatcher, check_for_new_pdfs
 from cardiocode.ingestion.knowledge_builder import (

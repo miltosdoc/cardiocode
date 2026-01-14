@@ -1,224 +1,232 @@
-"""
-Update AGENTS.md with CardioCode LLM-driven knowledge management.
-
-This document explains how agents should use CardioCode with the new LLM-powered
-knowledge search and function generation capabilities.
-"""
-
 # CardioCode Agent Usage Guide
 
 ## Overview
 
-CardioCode is now an LLM-driven clinical decision support system that combines:
-- **Static clinical functions** (risk scores, guideline assessments)
-- **Dynamic knowledge extraction** (chapter/keyword search without embeddings)
-- **Secure function generation** (two-step approval workflow)
+CardioCode is a clinical decision support system that provides:
+- **Clinical calculators** (risk scores like CHA2DS2-VASc, HAS-BLED, GRACE, Wells, HCM-SCD)
+- **Clinical assessments** (aortic stenosis severity, ICD indication)
+- **Knowledge search** (search across 11 pre-extracted ESC guideline PDFs)
 
-## Session Initialization
+## Available Tools
 
-**MUST CALL FIRST**:
+### Clinical Calculators
+
+#### `cardiocode_calculate_cha2ds2_vasc`
+Calculate stroke risk in atrial fibrillation.
 ```
-cardiocode_get_system_context()
-```
-
-This returns:
-- Available guidelines and their current processing status
-- All static functions (risk scores, assessments)
-- Generated functions awaiting approval
-- System capabilities and usage instructions
-
-## Clinical Question Answering Workflow
-
-### 1. Try Static Functions First
-For specific clinical calculations:
-```
-tool_calculate_cha2ds2_vasc(age="75", female="true", ...)
-tool_assess_aortic_stenosis(peak_velocity="4.5", ...)
-```
-
-### 2. Search Knowledge Base
-For guideline content or narrative questions:
-```
-tool_search_knowledge(query="aortic stenosis management")
-```
-
-Returns ranked chapters/tables with relevance scores.
-
-### 3. Retrieve Full Content
-For detailed chapter information:
-```
-tool_get_full_chapter(guideline_hash="...", chapter_title="...")
-```
-
-## Function Generation Workflow
-
-### 1. Propose Function
-When content appears suitable for automation:
-```
-tool_propose_function_from_content(content_query="risk score calculator")
-```
-
-Returns function proposal with:
-- Generated Python code
-- Test cases
-- Security hash
-- Approval requirements
-
-### 2. Approve Function
-After clinical review:
-```
-tool_approve_save_function(
-    proposal_id="abc123", 
-    code_hash="f8c9a...",
-    function_name="generated_as_risk_score"
+cardiocode_calculate_cha2ds2_vasc(
+    age="75",
+    female="true",
+    chf="false",
+    hypertension="true",
+    stroke_tia="false",
+    vascular_disease="false",
+    diabetes="true"
 )
 ```
 
-### 3. Reject Function
-If function is inadequate:
+#### `cardiocode_calculate_has_bled`
+Calculate bleeding risk for anticoagulation decisions.
 ```
-tool_reject_function(
-    proposal_id="abc123",
-    reason="Missing contraindication checks"
+cardiocode_calculate_has_bled(
+    hypertension_uncontrolled="false",
+    abnormal_renal="false",
+    abnormal_liver="false",
+    stroke_history="false",
+    bleeding_history="false",
+    labile_inr="false",
+    age_over_65="true",
+    drugs_predisposing="true",
+    alcohol_excess="false"
 )
 ```
 
-## System Maintenance Commands
-
-### Process New PDFs
-When new guidelines are added to `source_pdfs/`:
+#### `cardiocode_calculate_grace_score`
+Calculate ACS risk stratification.
 ```
-tool_process_pending_pdfs()
-```
-
-### Update Knowledge Base
-For web searches or new guideline downloads:
-```
-tool_propose_web_update(query="2025 ESC aortic stenosis", update_type="websearch")
-tool_confirm_web_update(proposal_id="def456", chosen_option="Search ESC website")
-```
-
-### Memory Management
-Store user-provided clinical knowledge:
-```
-tool_store_to_memory(
-    content="Hospital protocol for anticoagulation bridging",
-    keywords="bridging, warfarin, doac",
-    tags="protocol, anticoagulation"
+cardiocode_calculate_grace_score(
+    age="68",
+    heart_rate="88",
+    systolic_bp="130",
+    creatinine="1.2",
+    killip_class="1",
+    cardiac_arrest="false",
+    st_deviation="true",
+    elevated_troponin="true"
 )
 ```
 
-## Security and Safety
-
-### Two-Step Approval
-- **No auto-saving** functions without explicit approval
-- **Hash verification**: `approve_save_function` requires matching `code_hash`
-- **Audit trail**: All proposals and approvals are logged
-- **Version control**: Functions are versioned, not overwritten
-
-### Clinical Validation
-- All generated functions marked `requires_validation: True`
-- Test cases provided with each function proposal
-- Source content included for clinical verification
-
-### Trusted Sources
-Web updates restricted to:
-- ESC (European Society of Cardiology)
-- ACC/AHA (American College of Cardiology/American Heart Association)
-- PubMed Central
-- Peer-reviewed journals
-
-## Knowledge Retrieval Strategy
-
-### No Embeddings Required
-- Full guideline content fits in modern context windows
-- LLM selects relevant chapters based on:
-  - Chapter title matching
-  - Keyword matching
-  - Semantic similarity scoring
-  - Recency weighting
-
-### Content Organization
+#### `cardiocode_calculate_wells_pe`
+Calculate pulmonary embolism probability.
 ```
-Guideline PDF → Chapters (with titles, keywords, tables)
-├── Raw narrative content
-├── Structured tables
-├── Auto-generable sections (marked)
-└── User-provided memory items
+cardiocode_calculate_wells_pe(
+    clinical_signs_dvt="true",
+    pe_most_likely="true",
+    heart_rate_above_100="true",
+    immobilization_surgery="false",
+    previous_pe_dvt="false",
+    hemoptysis="false",
+    malignancy="false"
+)
 ```
 
-## Error Handling and Fallbacks
-
-### When Search Fails
-- Return error with suggestions for refined query
-- Offer to search all chapters if no matches found
-- Provide available chapter list for manual selection
-
-### When Function Generation Fails
-- Explain why content isn't suitable (e.g., narrative vs structured)
-- Suggest breaking down into smaller, structured components
-- Offer to try specific table/section instead
-
-## Example Sessions
-
-### Scenario 1: Clinical Question
+#### `cardiocode_calculate_hcm_scd_risk`
+Calculate 5-year sudden cardiac death risk in HCM.
 ```
-User: "What are the recommendations for severe asymptomatic AS?"
+cardiocode_calculate_hcm_scd_risk(
+    age="45",
+    max_wall_thickness="22",
+    la_diameter="45",
+    max_lvot_gradient="30",
+    family_history_scd="true",
+    nsvt="true",
+    unexplained_syncope="false"
+)
+```
+
+### Clinical Assessments
+
+#### `cardiocode_assess_aortic_stenosis`
+Assess AS severity and intervention indication.
+```
+cardiocode_assess_aortic_stenosis(
+    peak_velocity="4.5",
+    mean_gradient="45",
+    ava="0.8",
+    lvef="55",
+    stroke_volume_index="32"
+)
+```
+
+#### `cardiocode_assess_icd_indication`
+Assess ICD indication for SCD prevention.
+```
+cardiocode_assess_icd_indication(
+    lvef="30",
+    nyha_class="2",
+    etiology="ischemic",
+    prior_vf_vt="false",
+    syncope="false",
+    days_post_mi="90"
+)
+```
+
+### Knowledge Base Tools
+
+#### `cardiocode_get_knowledge_status`
+Get status of available guidelines.
+```
+cardiocode_get_knowledge_status()
+```
+
+Returns list of 11 pre-processed ESC guidelines:
+- 2025 ESC/EACTS Valvular Heart Disease
+- 2022 ESC Ventricular Arrhythmias/SCD
+- 2022 ESC/ERS Pulmonary Hypertension
+- 2022 ESC Cardio-Oncology
+- 2021 ESC Heart Failure
+- 2021 ESC Cardiac Pacing/CRT
+- 2021 ESC Cardiovascular Prevention
+- 2020 ESC Congenital Heart Disease
+- 2020 ESC Sports Cardiology
+- 2019 ESC Pulmonary Embolism
+- 2018 ESC Syncope
+
+#### `cardiocode_search_knowledge`
+Search across all guideline content.
+```
+cardiocode_search_knowledge(
+    query="aortic stenosis treatment recommendations",
+    max_results="5"
+)
+```
+
+Returns ranked results with:
+- Guideline and chapter information
+- Content preview
+- Matched keywords
+- Relevance score
+- Table count
+
+#### `cardiocode_get_chapter`
+Get full chapter content.
+```
+cardiocode_get_chapter(
+    guideline_slug="2025_esc_eacts_valvular_heart_disease_ehaf194",
+    chapter_title="Aortic stenosis"
+)
+```
+
+#### `cardiocode_process_pdfs`
+Process new PDFs added to `source_pdfs/` directory.
+```
+cardiocode_process_pdfs()
+```
+
+Use this after adding new guideline PDFs to extract chapters, tables, and keywords.
+
+## Clinical Question Workflow
+
+### 1. For Calculations
+Use the specific calculator tool directly:
+```
+cardiocode_calculate_cha2ds2_vasc(age="75", female="true", hypertension="true", ...)
+```
+
+### 2. For Guideline Questions
+Search the knowledge base:
+```
+cardiocode_search_knowledge(query="severe asymptomatic aortic stenosis management")
+```
+
+Then retrieve full chapter if needed:
+```
+cardiocode_get_chapter(guideline_slug="...", chapter_title="...")
+```
+
+### 3. For Severity Assessments
+Use the assessment tools:
+```
+cardiocode_assess_aortic_stenosis(peak_velocity="4.5", mean_gradient="45", ava="0.8")
+```
+
+## Example Session
+
+```
+User: "72-year-old woman with AF, hypertension, diabetes. What's her stroke risk?"
 
 Agent:
-1. cardiocode_get_system_context()
-2. tool_search_knowledge(query="severe asymptomatic aortic stenosis")
-3. tool_get_full_chapter(...) for most relevant chapter
-4. Generate answer with source citations
-```
+1. Use cardiocode_calculate_cha2ds2_vasc(
+       age="72", female="true", hypertension="true", diabetes="true"
+   )
+2. Result: Score 5 (High risk) - Anticoagulation recommended
 
-### Scenario 2: Function Generation
-```
-User: "This risk table should be a function"
+User: "What about bleeding risk? She's on aspirin."
 
 Agent:
-1. cardiocode_get_system_context()
-2. tool_propose_function_from_content(content_query="risk table")
-3. [Reviews proposal with clinician]
-4. tool_approve_save_function(proposal_id="...", code_hash="...", function_name="...")
-5. Function becomes available in system
-```
-
-### Scenario 3: System Update
-```
-User: "Check for latest aortic stenosis guidelines"
-
-Agent:
-1. tool_propose_web_update(query="aortic stenosis guidelines 2024 2025")
-2. [Presents options: ESC website, PubMed, custom URL]
-3. tool_confirm_web_update(...)
-4. tool_process_pending_pdfs() if new PDF downloaded
+1. Use cardiocode_calculate_has_bled(
+       age_over_65="true", hypertension_uncontrolled="false", drugs_predisposing="true"
+   )
+2. Result: Score 2 (Moderate) - Address modifiable factors, anticoagulation still indicated
 ```
 
 ## Best Practices
 
-1. **Always call `cardiocode_get_system_context()` first**
-2. **Use specific functions when available** (more reliable than search)
-3. **Cite sources** when using searched content
-4. **Validate function logic** before approving
-5. **Keep audit trail** by using proper approval workflow
-6. **Check for function conflicts** before generating new ones
+1. **Use calculators for specific scores** - more reliable than searching
+2. **Search knowledge for narrative questions** - treatment recommendations, diagnostic criteria
+3. **Cite guideline sources** when providing recommendations
+4. **Check knowledge status** to see available guidelines
 
 ## Troubleshooting
 
-### If tools aren't found:
-- Verify LLM tools loaded properly
-- Check that `cardiocode/mcp/tools.py` was updated
-- Restart MCP server if needed
+### Tools not found
+- Verify MCP server is running
+- Check `opencode.json` configuration
 
-### If PDF processing fails:
-- Check PyMuPDF installation: `pip install pymupdf`
-- Verify PDF path and permissions
-- Check PDF isn't corrupted
+### PDF processing fails
+- Install PyMuPDF: `pip install pymupdf`
+- Verify PDFs exist in `source_pdfs/` directory
 
-### If function generation fails:
-- Ensure content has clear input/output structure
-- Try more specific content description
-- Check for malformatted tables or complex algorithms
-
-This LLM-driven approach makes CardioCode more flexible while maintaining clinical safety through the secure approval workflow.
+### Search returns no results
+- Try broader search terms
+- Check `cardiocode_get_knowledge_status()` for available guidelines

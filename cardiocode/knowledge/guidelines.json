@@ -1,0 +1,104 @@
+{
+  "guidelines": {
+    "c19fff3523fa3505": {
+      "filename": "ehab368.pdf",
+      "slug": "ehab368_2021",
+      "type": "heart_failure",
+      "year": 2021,
+      "title": "OP-EHEA210374 3599..3726",
+      "chapters_count": 283,
+      "source_path": "source_pdfs/ehab368.pdf"
+    },
+    "a636b20c1f8f5f0f": {
+      "filename": "ehac262.pdf",
+      "slug": "ehac262_2022",
+      "type": "ventricular_arrhythmias",
+      "year": 2022,
+      "title": "2022 ESC Guidelines for the management of patients with ventricular arrhythmias and the prevention of sudden cardiac death",
+      "chapters_count": 20,
+      "source_path": "source_pdfs/ehac262.pdf"
+    },
+    "63c5400909d51e3d": {
+      "filename": "ehaa605.pdf",
+      "slug": "ehaa605_2020",
+      "type": "peripheral_arterial",
+      "year": 2020,
+      "title": "OP-EHEA200603 17..96",
+      "chapters_count": 9,
+      "source_path": "source_pdfs/ehaa605.pdf"
+    },
+    "1cbdd15997a5c737": {
+      "filename": "ehab484.pdf",
+      "slug": "ehab484_2021",
+      "type": "other",
+      "year": 2021,
+      "title": "OP-EHEA210490 3227..3337",
+      "chapters_count": 129,
+      "source_path": "source_pdfs/ehab484.pdf"
+    },
+    "3b969a390c8475e4": {
+      "filename": "ehaa554.pdf",
+      "slug": "ehaa554_2020",
+      "type": "valvular_heart_disease",
+      "year": 2020,
+      "title": "OP-EHEA200554 563..646",
+      "chapters_count": 116,
+      "source_path": "source_pdfs/ehaa554.pdf"
+    },
+    "9f13e8f9ffb14cbe": {
+      "filename": "ehy037.pdf",
+      "slug": "ehy037_2018",
+      "type": "other",
+      "year": 2018,
+      "title": "OP-EHEA180037 1883..1951",
+      "chapters_count": 92,
+      "source_path": "source_pdfs/ehy037.pdf"
+    },
+    "238d02cf070f015f": {
+      "filename": "ehz405.pdf",
+      "slug": "ehz405_2019",
+      "type": "pulmonary_embolism",
+      "year": 2019,
+      "title": "OP-EHEA190412 543..604",
+      "chapters_count": 86,
+      "source_path": "source_pdfs/ehz405.pdf"
+    },
+    "89afc0912150e7c1": {
+      "filename": "ehab364.pdf",
+      "slug": "ehab364_2021",
+      "type": "heart_failure",
+      "year": 2021,
+      "title": "OP-EHEA210369 1..94",
+      "chapters_count": 309,
+      "source_path": "source_pdfs/ehab364.pdf"
+    },
+    "8b8a5090fac1b596": {
+      "filename": "ehac244.pdf",
+      "slug": "ehac244_2022",
+      "type": "cardio_oncology",
+      "year": 2022,
+      "title": "2022 ESC Guidelines on cardio-oncology developed in collaboration with the European Hematology Association (EHA), the European Society for Therapeutic Radiology and Oncology (ESTRO) and the International Cardio-Oncology Society (IC-OS)",
+      "chapters_count": 24,
+      "source_path": "source_pdfs/ehac244.pdf"
+    },
+    "40903dc5c3ef8362": {
+      "filename": "2022 ESC_ERS Guidelines for the diagnosis and treatment of pulmonary hypertension _ European Heart Journal _ Oxford Academic.pdf",
+      "slug": "2022_esc_ers_guidelines_for_the_diagnosis_and_trea",
+      "type": "pulmonary_hypertension",
+      "year": 2022,
+      "title": "2022 ESC/ERS Guidelines for the diagnosis and treatment of pulmonary hypertension",
+      "chapters_count": 24,
+      "source_path": "source_pdfs/2022 ESC_ERS Guidelines for the diagnosis and treatment of pulmonary hypertension _ European Heart Journal _ Oxford Academic.pdf"
+    },
+    "c21c30141b688d71": {
+      "filename": "2025_ESC_EACTS_Valvular_Heart_Disease_ehaf194.pdf",
+      "slug": "2025_esc_eacts_valvular_heart_disease_ehaf194",
+      "type": "valvular_heart_disease",
+      "year": 2025,
+      "title": "2025 ESC/EACTS Guidelines for the",
+      "chapters_count": 27,
+      "source_path": "source_pdfs/2025_ESC_EACTS_Valvular_Heart_Disease_ehaf194.pdf"
+    }
+  },
+  "last_scan": null
+}

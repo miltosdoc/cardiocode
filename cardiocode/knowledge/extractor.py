@@ -28,8 +28,8 @@ class PDFExtractor:
             # Find the cardiocode package directory
             base_path = Path(__file__).parent.parent
         
-        self.base_path = Path(base_path)
-        self.source_dir = self.base_path.parent / "source_pdfs"
+        self.base_path = Path(base_path).resolve()
+        self.source_dir = (self.base_path.parent / "source_pdfs").resolve()
         self.knowledge_dir = self.base_path / "knowledge" / "chapters"
         self.index_file = self.base_path / "knowledge" / "guidelines.json"
         
@@ -81,7 +81,7 @@ class PDFExtractor:
                 with open(chapter_file, 'w', encoding='utf-8') as f:
                     json.dump(guideline_data, f, indent=2, ensure_ascii=False)
                 
-                # Update index
+                # Update index (use posix paths for cross-platform compatibility)
                 self.index["guidelines"][file_hash] = {
                     "filename": pdf_path.name,
                     "slug": slug,
@@ -90,6 +90,7 @@ class PDFExtractor:
                     "title": guideline_data.get("title"),
                     "chapters_count": len(guideline_data.get("chapters", [])),
                     "processed_at": datetime.now().isoformat(),
+                    "source_path": f"source_pdfs/{pdf_path.name}",  # Always use forward slashes
                 }
                 
                 results["processed"].append(pdf_path.name)

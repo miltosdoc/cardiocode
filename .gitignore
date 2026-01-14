@@ -60,6 +60,6 @@ cache/
 tmp/
 temp/
 
-# Generated knowledge base (re-extract from PDFs)
-cardiocode/knowledge/chapters/
-cardiocode/knowledge/guidelines.json
+# Note: Knowledge base IS committed so users have it immediately
+# cardiocode/knowledge/chapters/ - COMMITTED (pre-extracted guideline content)
+# cardiocode/knowledge/guidelines.json - COMMITTED (index of processed guidelines)
