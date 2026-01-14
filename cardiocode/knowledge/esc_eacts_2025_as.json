@@ -1,0 +1,29 @@
+{
+  "guideline_hash": "esc_eacts_2025_as_ehaf194",
+  "title": "2025 ESC/EACTS Guidelines for the Management of Valvular Heart Disease",
+  "doi": "10.1093/eurheartj/ehaf194",
+  "year": 2025,
+  "type": "valvular_heart_disease",
+  "source_pdf": "/Users/meditalks/Desktop/cardiocode/source_pdfs/2025_ESC_EACTS_Valvular_Heart_Disease_ehaf194.pdf",
+  "processed_date": "2025-01-14",
+  "chapters": {
+    "aortic_stenosis": {
+      "title": "Section 8: Aortic Stenosis",
+      "content": "2025 ESC/EACTS Guidelines for the Management of Valvular Heart Disease - Aortic Stenosis Section\n\nSeverity Assessment Criteria:\n\nMILD Aortic Stenosis:\n- Aortic Valve Area (AVA): >1.5 cm\u00b2\n- Indexed AVA (AVAi): >0.85 cm\u00b2/m\u00b2  \n- Mean Gradient: <25 mmHg\n- Peak Velocity (Vmax): <3.0 m/s\n\nMODERATE Aortic Stenosis:\n- Aortic Valve Area (AVA): 1.0-1.5 cm\u00b2\n- Indexed AVA (AVAi): 0.60-0.85 cm\u00b2/m\u00b2\n- Mean Gradient: 25-40 mmHg  \n- Peak Velocity (Vmax): 3.0-4.0 m/s\n\nSEVERE Aortic Stenosis:\n- Aortic Valve Area (AVA): <1.0 cm\u00b2\n- Indexed AVA (AVAi): <0.60 cm\u00b2/m\u00b2\n- Mean Gradient: >40 mmHg\n- Peak Velocity (Vmax): >4.0 m/s\n\nVERY SEVERE Aortic Stenosis:\n- Mean Gradient: \u226560 mmHg\n- Peak Velocity (Vmax): >5.0 m/s\n\nSpecial Situations:\n- Low-Flow Low-Gradient AS: Mean gradient <40 mmHg with AVA <1.0 cm\u00b2\n  * With reduced LVEF: Consider dobutamine stress echo\n  * With normal LVEF: Stroke Volume Index (SVi) \u226435 mL/m\u00b2\n\nIntervention Indications:\n- Symptomatic severe AS: intervention recommended for all eligible patients\n- Asymptomatic severe AS with LVEF <55% or very severe hemodynamics\n- Heart Team decision required for TAVI vs SAVR selection\n- Age and anatomical factors guide treatment choice",
+      "keywords": [
+        "aortic stenosis",
+        "severity assessment",
+        "intervention criteria",
+        "TAVI",
+        "SAVR"
+      ],
+      "tables": [
+        "severity_grading",
+        "intervention_timing",
+        "treatment_selection"
+      ]
+    }
+  },
+  "status": "processed",
+  "extraction_method": "manual"
+}

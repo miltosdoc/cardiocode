@@ -1,0 +1,76 @@
+2025 ESC/EACTS Guidelines for the Management of Valvular Heart Disease
+DOI: 10.1093/eurheartj/ehaf194
+European Heart Journal, 2025
+
+SECTION 8: AORTIC STENOSIS
+
+Severity Assessment Criteria:
+
+MILD Aortic Stenosis:
+- Aortic Valve Area (AVA): >1.5 cm²
+- Indexed AVA (AVAi): >0.85 cm²/m²  
+- Mean Gradient: <25 mmHg
+- Peak Velocity (Vmax): <3.0 m/s
+
+MODERATE Aortic Stenosis:
+- Aortic Valve Area (AVA): 1.0-1.5 cm²
+- Indexed AVA (AVAi): 0.60-0.85 cm²/m²
+- Mean Gradient: 25-40 mmHg  
+- Peak Velocity (Vmax): 3.0-4.0 m/s
+
+SEVERE Aortic Stenosis:
+- Aortic Valve Area (AVA): <1.0 cm²
+- Indexed AVA (AVAi): <0.60 cm²/m²
+- Mean Gradient: >40 mmHg
+- Peak Velocity (Vmax): >4.0 m/s
+
+VERY SEVERE Aortic Stenosis:
+- Mean Gradient: ≥60 mmHg
+- Peak Velocity (Vmax): >5.0 m/s
+
+Special Situations:
+- Low-Flow Low-Gradient AS: Mean gradient <40 mmHg with AVA <1.0 cm²
+  * With reduced LVEF: Consider dobutamine stress echo
+  * With normal LVEF: Stroke Volume Index (SVi) ≤35 mL/m²
+
+Additional Diagnostic Tools:
+- CT Calcium Scoring: Severe AS if Agatston units >2000 (women) or >3000 (men)
+- Stress Testing: Exercise-induced symptoms or abnormal BP response in asymptomatic patients
+- Biomarkers: BNP/NT-proBNP elevation >3x age/sex normal range
+
+Intervention Indications - Symptomatic Severe AS:
+- Intervention recommended in all eligible symptomatic patients with high-gradient severe AS
+- Low-flow, low-gradient AS with reduced LVEF: intervention considered if reduced LV function is predominantly caused by excessive afterload
+- Low-flow, low-gradient AS with normal LVEF: intervention considered after careful confirmation that AS is severe
+
+Intervention Indications - Asymptomatic Severe AS:
+- LV dysfunction (LVEF <55%) without another cause
+- LVEF ≥50% with low procedural risk AND one of:
+  * Very severe AS (mean gradient ≥60 mmHg or Vmax >5.0 m/s)
+  * Severe valve calcification with Vmax progression ≥0.3 m/s/year
+  * Markedly elevated BNP/NT-proBNP (>3x age/sex normal range)
+- LVEF >55% with normal exercise test, low procedural risk, AND one of:
+  * Very severe AS (mean gradient ≥60 mmHg or Vmax >5 m/s)
+  * Severe valve calcification with Vmax progression ≥0.3 m/s/year
+  * Markedly elevated BNP levels confirmed on repeated measurements
+
+Mode of Intervention - Symptomatic Severe AS:
+- Choice based on Heart Team evaluation of clinical, anatomical, and procedural factors
+- TAVI recommended: ≥75 years, high risk (>8% STS-PROM/EuroSCORE II), or unsuitable for surgery
+- TAVI recommended: ≥70 years with tricuspid AV and suitable anatomy
+- SAVR recommended: <75 years, low risk (<4% STS-PROM/EuroSCORE II), or unsuitable for transfemoral TAVI
+- SAVR recommended: <70 years with low surgical risk
+
+Follow-up Recommendations:
+- Severe AS: follow-up every 6 months for early symptom detection
+- Younger patients with mild AS and no calcification: every 2-3 years
+- Moderate degenerative AS: re-evaluated at least annually
+- Serial natriuretic peptide measurements provide additional timing information
+
+Key Points from 2025 Guidelines:
+- Mean gradient is the most robust parameter
+- Discordant findings require additional testing
+- Severe valve calcification on CT supports AS severity diagnosis
+- Serial Vmax progression ≥0.3 m/s/year indicates disease progression
+- Heart Team approach essential for complex decisions
+- Patient-centered decision making emphasized

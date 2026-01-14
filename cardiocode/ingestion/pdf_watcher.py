@@ -124,7 +124,7 @@ class GuidelineRegistry:
                 for hash_key, meta in data.items():
                     self.guidelines[hash_key] = PDFMetadata(
                         filename=meta["filename"],
-                        filepath=meta["filepath"],
+                        filepath=meta["filepath"],  # Keep original path format for display
                         file_hash=meta["file_hash"],
                         file_size=meta["file_size"],
                         detected_at=datetime.fromisoformat(meta["detected_at"]),
@@ -371,7 +371,7 @@ class GuidelineWatcher:
             # New PDF detected
             metadata = PDFMetadata(
                 filename=filepath.name,
-                filepath=str(filepath),
+                filepath=str(filepath.as_posix()),  # Use POSIX paths for cross-platform compatibility
                 file_hash=file_hash,
                 file_size=filepath.stat().st_size,
                 detected_at=datetime.now(),

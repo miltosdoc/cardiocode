@@ -10,5 +10,41 @@
       "file_size": 5303986,
       "acknowledged": true
     }
+  },
+  {
+    "event_type": "new_pdf",
+    "filename": "2025_ESC_EACTS_Valvular_Heart_Disease_Guidelines.pdf",
+    "message": "New guideline PDF detected: 2025_ESC_EACTS_Valvular_Heart_Disease_Guidelines.pdf",
+    "timestamp": "2026-01-14T22:21:57.288764",
+    "details": {
+      "guideline_type": "valvular_heart_disease",
+      "guideline_year": 2025,
+      "file_size": 3844804,
+      "acknowledged": false
+    }
+  },
+  {
+    "event_type": "new_pdf",
+    "filename": "2025_ESC_EACTS_Valvular_Heart_Disease_Guidelines.pdf",
+    "message": "New guideline PDF detected: 2025_ESC_EACTS_Valvular_Heart_Disease_Guidelines.pdf",
+    "timestamp": "2026-01-14T22:22:15.244407",
+    "details": {
+      "guideline_type": "valvular_heart_disease",
+      "guideline_year": 2025,
+      "file_size": 3844804,
+      "acknowledged": false
+    }
+  },
+  {
+    "event_type": "new_pdf",
+    "filename": "2025_ESC_EACTS_Valvular_Heart_Disease_ehaf194.pdf",
+    "message": "New guideline PDF detected: 2025_ESC_EACTS_Valvular_Heart_Disease_ehaf194.pdf",
+    "timestamp": "2026-01-14T22:25:16.807753",
+    "details": {
+      "guideline_type": "valvular_heart_disease",
+      "guideline_year": 2025,
+      "file_size": 5730591,
+      "acknowledged": false
+    }
   }
 ]

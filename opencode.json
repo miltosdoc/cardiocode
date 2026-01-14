@@ -3,7 +3,7 @@
   "mcp": {
     "cardiocode": {
       "type": "local",
-      "command": ["python", "-m", "cardiocode.mcp.server"],
+      "command": ["python3.11", "-m", "cardiocode.mcp.server"],
       "enabled": true
     }
   }
