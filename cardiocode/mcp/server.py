@@ -24,7 +24,7 @@ try:
     MCP_AVAILABLE = True
 except ImportError:
     # Fallback if MCP package not available
-    print("Warning: MCP package not available. Using fallback implementation.")
+    print("Warning: MCP package not available. Using fallback implementation.", file=sys.stderr)
     MCP_AVAILABLE = False
 
 # Import tools
@@ -68,151 +68,122 @@ else:
     
     server = FallbackServer()
 
-@server.list_tools()
-async def list_tools() -> ListToolsResult:
-    """List all available CardioCode tools."""
-    tools = []
+def _get_tool_schema(name: str, info: Dict[str, Any]) -> Tool:
+    """Generate tool schema from function metadata."""
+    func = info["function"]
     
-    for name, info in TOOL_REGISTRY.items():
-        func = info["function"]
+    # Extract JSON schema from function signature and docstring
+    import inspect
+    sig = inspect.signature(func)
+    doc = func.__doc__ or ""
+    
+    # Parse docstring for Args section
+    properties = {}
+    required = []
+    
+    # Extract parameter descriptions from docstring
+    param_docs = {}
+    in_args = False
+    current_param = None
+    for line in doc.split("\n"):
+        line = line.strip()
+        if line.startswith("Args:"):
+            in_args = True
+            continue
+        if in_args and line.startswith("  ") and ":" in line:
+            # New parameter
+            param_name = line.split(":")[0].strip()
+            param_desc = line.split(":", 1)[1].strip()
+            param_docs[param_name] = param_desc
+            current_param = param_name
+        elif in_args and line.startswith("    ") and current_param:
+            # Continuation of parameter description
+            param_docs[current_param] += " " + line.strip()
+    
+    # Build JSON schema from function signature
+    for param_name, param in sig.parameters.items():
+        param_type = "string"
+        if param.annotation == int:
+            param_type = "integer"
+        elif param.annotation == float:
+            param_type = "number"
+        elif param.annotation == bool:
+            param_type = "boolean"
         
-        # Extract JSON schema from function signature and docstring
-        import inspect
-        sig = inspect.signature(func)
-        doc = func.__doc__ or ""
+        param_schema = {"type": param_type}
         
-        # Parse docstring for Args section
-        properties = {}
-        required = []
+        # Add description if available
+        if param_name in param_docs:
+            param_schema["description"] = param_docs[param_name]
         
-        # Extract parameter descriptions from docstring
-        param_docs = {}
-        in_args = False
-        current_param = None
-        for line in doc.split("\\n"):
-            line = line.strip()
-            if line.startswith("Args:"):
-                in_args = True
-                continue
-            if in_args and line.startswith("  ") and ":" in line:
-                # New parameter
-                param_name = line.split(":")[0].strip()
-                param_desc = ":".join(line.split(":")[1:]).strip()
-                param_docs[param_name] = param_desc
-                current_param = param_name
+        # Handle optional parameters
+        if param.default == inspect.Parameter.empty:
+            required.append(param_name)
+        else:
+            param_schema["default"] = param.default
         
-        # Build properties from signature
-        for param_name, param in sig.parameters.items():
-            if param_name in ("self", "cls"):
-                continue
-            
-            # Determine type
-            annotation = param.annotation
-            param_type = "string"  # default
-            
-            if annotation != inspect.Parameter.empty:
-                if annotation == int:
-                    param_type = "integer"
-                elif annotation == float:
-                    param_type = "number"
-                elif annotation == bool:
-                    param_type = "boolean"
-                elif annotation == str:
-                    param_type = "string"
-                elif hasattr(annotation, "__origin__"):
-                    # Handle Optional, List, etc.
-                    origin = getattr(annotation, "__origin__", None)
-                    if origin is list:
-                        param_type = "array"
-                    elif origin is dict:
-                        param_type = "object"
-            
-            prop = {"type": param_type}
-            
-            # Add description from docstring
-            if param_name in param_docs:
-                prop["description"] = param_docs[param_name]
-            
-            properties[param_name] = prop
-            
-            # Check if required (no default value)
-            if param.default == inspect.Parameter.empty:
-                required.append(param_name)
-        
-        return {
+        properties[param_name] = param_schema
+    
+    return Tool(
+        name=name,
+        description=doc.split("\n")[0] if doc else f"CardioCode tool: {name}",
+        inputSchema={
             "type": "object",
             "properties": properties,
             "required": required,
-        }
-    
-    for name, info in TOOL_REGISTRY.items():
-        tools.append(Tool(
-            name=name,
-            description=info["description"],
-            inputSchema=_get_tool_schema(name, info["function"]),
-        ))
-    
-    logger.info(f"Listed {len(tools)} tools")
-    return ListToolsResult(tools=tools)
+        },
+    )
 
-@server.call_tool()
-async def handle_call_tool(name: str, arguments: Dict[str, Any]) -> CallToolResult:
-    """Handle tool invocation."""
-    logger.info(f"Tool call: {name} with args: {arguments}")
-    
-    if name not in TOOL_REGISTRY:
-        return CallToolResult(
-            content=[TextContent(
-                type="text",
-                text=json.dumps({
-                    "error": f"Unknown tool: {name}",
-                    "available_tools": list(TOOL_REGISTRY.keys()),
-                }),
-            )],
-            isError=True,
-        )
-    
-    try:
-        result = call_tool(name, arguments or {})
+if MCP_AVAILABLE:
+    @server.list_tools()
+    async def list_tools() -> ListToolsResult:
+        """List all available CardioCode tools."""
+        tools = []
         
-        # Format result as JSON
-        result_text = json.dumps(result, indent=2, default=str)
+        for name, info in TOOL_REGISTRY.items():
+            tool = _get_tool_schema(name, info)
+            tools.append(tool)
         
-        return CallToolResult(
-            content=[TextContent(
-                type="text",
-                text=result_text,
-            )],
-        )
-    
-    except Exception as e:
-        logger.error(f"Tool error: {e}", exc_info=True)
-        return CallToolResult(
-            content=[TextContent(
-                type="text",
-                text=json.dumps({
-                    "error": str(e),
-                    "tool": name,
-                    "arguments": arguments,
-                }),
-            )],
-            isError=True,
-        )
+        return ListToolsResult(tools=tools)
 
-async def run_server():
-    """Run MCP server."""
-    logger.info("Starting CardioCode MCP server...")
-    
-    async with stdio_server() as (read_stream, write_stream):
-        await server.run(
-            read_stream,
-            write_stream,
-            server.create_initialization_options(),
-        )
+    @server.call_tool()
+    async def call_tool_handler(name: str, arguments: Dict[str, Any]) -> CallToolResult:
+        """Handle tool calls."""
+        try:
+            result = call_tool(name, arguments)
+            
+            if isinstance(result, dict) and "error" in result:
+                return CallToolResult(
+                    content=[TextContent(type="text", text=f"Error: {result['error']}")]
+                )
+            
+            return CallToolResult(
+                content=[TextContent(type="text", text=str(result))]
+            )
+            
+        except Exception as e:
+            logger.error(f"Error calling tool {name}: {e}")
+            return CallToolResult(
+                content=[TextContent(type="text", text=f"Error: {str(e)}")]
+            )
+
+async def main():
+    """Main server entry point."""
+    if MCP_AVAILABLE:
+        async with stdio_server() as (read_stream, write_stream):
+            await server.run(
+                read_stream,
+                write_stream,
+                server.create_initialization_options()
+            )
+    else:
+        # Fallback mode
+        import sys
+        await server.run(sys.stdin, sys.stdout)
 
 def serve():
-    """Entry point for MCP server."""
-    asyncio.run(run_server())
+    """Serve function for module import."""
+    asyncio.run(main())
 
 if __name__ == "__main__":
     serve()
