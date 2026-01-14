@@ -1,0 +1,122 @@
+{
+  "40903dc5c3ef83625fe59e42b498db94e7da84ccf905bd53ed0e836908e0d861": {
+    "filename": "2022 ESC_ERS Guidelines for the diagnosis and treatment of pulmonary hypertension _ European Heart Journal _ Oxford Academic.pdf",
+    "filepath": "source_pdfs\\2022 ESC_ERS Guidelines for the diagnosis and treatment of pulmonary hypertension _ European Heart Journal _ Oxford Academic.pdf",
+    "file_hash": "40903dc5c3ef83625fe59e42b498db94e7da84ccf905bd53ed0e836908e0d861",
+    "file_size": 7216709,
+    "detected_at": "2026-01-14T15:41:45.566918",
+    "processed": false,
+    "guideline_type": "pulmonary_hypertension",
+    "guideline_year": 2022,
+    "processing_status": "pending",
+    "notes": null
+  },
+  "3b969a390c8475e406a030368d656201880af7b55395847599c5dd469a984711": {
+    "filename": "ehaa554.pdf",
+    "filepath": "source_pdfs\\ehaa554.pdf",
+    "file_hash": "3b969a390c8475e406a030368d656201880af7b55395847599c5dd469a984711",
+    "file_size": 4853998,
+    "detected_at": "2026-01-14T15:41:45.585433",
+    "processed": false,
+    "guideline_type": "congenital_heart_disease",
+    "guideline_year": 2020,
+    "processing_status": "pending",
+    "notes": null
+  },
+  "63c5400909d51e3d90584ff66038426e8fa65d89cd77e54cfaaefbbcf53230e2": {
+    "filename": "ehaa605.pdf",
+    "filepath": "source_pdfs\\ehaa605.pdf",
+    "file_hash": "63c5400909d51e3d90584ff66038426e8fa65d89cd77e54cfaaefbbcf53230e2",
+    "file_size": 6073131,
+    "detected_at": "2026-01-14T15:41:45.602374",
+    "processed": false,
+    "guideline_type": "sports_cardiology",
+    "guideline_year": 2020,
+    "processing_status": "pending",
+    "notes": null
+  },
+  "89afc0912150e7c106263a3e46557e69e0941dc2febee07c613f81b35c6d6f52": {
+    "filename": "ehab364.pdf",
+    "filepath": "source_pdfs\\ehab364.pdf",
+    "file_hash": "89afc0912150e7c106263a3e46557e69e0941dc2febee07c613f81b35c6d6f52",
+    "file_size": 4507774,
+    "detected_at": "2026-01-14T15:41:45.633928",
+    "processed": false,
+    "guideline_type": "cardiac_pacing",
+    "guideline_year": 2021,
+    "processing_status": "pending",
+    "notes": null
+  },
+  "c19fff3523fa3505620c98cdf67f5d9ad4cd882e94a5f343871b2de65f119662": {
+    "filename": "ehab368.pdf",
+    "filepath": "source_pdfs\\ehab368.pdf",
+    "file_hash": "c19fff3523fa3505620c98cdf67f5d9ad4cd882e94a5f343871b2de65f119662",
+    "file_size": 5175844,
+    "detected_at": "2026-01-14T15:41:45.668702",
+    "processed": false,
+    "guideline_type": "heart_failure",
+    "guideline_year": 2021,
+    "processing_status": "pending",
+    "notes": null
+  },
+  "1cbdd15997a5c737ae281b358dff50fd16ad175a1b7d484d2259e25d8936d641": {
+    "filename": "ehab484.pdf",
+    "filepath": "source_pdfs\\ehab484.pdf",
+    "file_hash": "1cbdd15997a5c737ae281b358dff50fd16ad175a1b7d484d2259e25d8936d641",
+    "file_size": 6895172,
+    "detected_at": "2026-01-14T15:41:45.706616",
+    "processed": false,
+    "guideline_type": "cardiovascular_prevention",
+    "guideline_year": 2021,
+    "processing_status": "pending",
+    "notes": null
+  },
+  "8b8a5090fac1b596deab79f0ebf8b69d9a05d0a466cf948dffb49d409cc0caa8": {
+    "filename": "ehac244.pdf",
+    "filepath": "source_pdfs\\ehac244.pdf",
+    "file_hash": "8b8a5090fac1b596deab79f0ebf8b69d9a05d0a466cf948dffb49d409cc0caa8",
+    "file_size": 10880717,
+    "detected_at": "2026-01-14T15:41:45.758467",
+    "processed": false,
+    "guideline_type": "cardio_oncology",
+    "guideline_year": 2022,
+    "processing_status": "pending",
+    "notes": null
+  },
+  "a636b20c1f8f5f0f7f5cabc87e6ac2287d3e98c9e46e9178ead26a7b72c82454": {
+    "filename": "ehac262.pdf",
+    "filepath": "source_pdfs\\ehac262.pdf",
+    "file_hash": "a636b20c1f8f5f0f7f5cabc87e6ac2287d3e98c9e46e9178ead26a7b72c82454",
+    "file_size": 12750793,
+    "detected_at": "2026-01-14T15:41:45.810290",
+    "processed": false,
+    "guideline_type": "ventricular_arrhythmias",
+    "guideline_year": 2022,
+    "processing_status": "pending",
+    "notes": null
+  },
+  "238d02cf070f015f92f94dd73daccb29e1d723c15f91dc670de00536f45fe257": {
+    "filename": "ehz405.pdf",
+    "filepath": "source_pdfs\\ehz405.pdf",
+    "file_hash": "238d02cf070f015f92f94dd73daccb29e1d723c15f91dc670de00536f45fe257",
+    "file_size": 3714425,
+    "detected_at": "2026-01-14T15:41:45.836906",
+    "processed": false,
+    "guideline_type": "pulmonary_embolism",
+    "guideline_year": 2019,
+    "processing_status": "pending",
+    "notes": null
+  },
+  "9f13e8f9ffb14cbead676213ed825fea1c7caf8ff2e0c481c1fff1e8c80f8460": {
+    "filename": "ehy037.pdf",
+    "filepath": "source_pdfs\\ehy037.pdf",
+    "file_hash": "9f13e8f9ffb14cbead676213ed825fea1c7caf8ff2e0c481c1fff1e8c80f8460",
+    "file_size": 5303986,
+    "detected_at": "2026-01-14T15:47:30.199904",
+    "processed": false,
+    "guideline_type": "ventricular_arrhythmias",
+    "guideline_year": null,
+    "processing_status": "pending",
+    "notes": null
+  }
+}

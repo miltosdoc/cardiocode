@@ -1,0 +1,14 @@
+[
+  {
+    "event_type": "new_pdf",
+    "filename": "ehy037.pdf",
+    "message": "New guideline PDF detected: ehy037.pdf",
+    "timestamp": "2026-01-14T15:47:30.209835",
+    "details": {
+      "guideline_type": "ventricular_arrhythmias",
+      "guideline_year": null,
+      "file_size": 5303986,
+      "acknowledged": true
+    }
+  }
+]
