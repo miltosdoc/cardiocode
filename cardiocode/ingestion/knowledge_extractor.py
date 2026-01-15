@@ -82,19 +82,22 @@ class KnowledgeExtractor:
         if not Path(pdf_path).exists():
             raise FileNotFoundError(f"PDF file not found: {pdf_path}")
         
-        with fitz.open(pdf_path) as doc:
+        # Open document and keep it open for all operations
+        doc = fitz.open(pdf_path)
+        
+        try:
             # Get basic info
             total_pages = len(doc)
             
             # Try to get TOC first
             toc = doc.get_toc()
             
-        # Extract chapters
-        try:
-            chapters = self._extract_chapters(doc, toc)
-        except Exception as e:
-            print(f"Error extracting chapters from {pdf_path}: {e}")
-            chapters = []
+            # Extract chapters
+            try:
+                chapters = self._extract_chapters(doc, toc)
+            except Exception as e:
+                print(f"Error extracting chapters from {pdf_path}: {e}")
+                chapters = []
             
             # Extract tables
             tables = self._extract_tables(doc)
@@ -119,46 +122,89 @@ class KnowledgeExtractor:
                 "chapters": [self._chapter_to_dict(ch) for ch in chapters],
                 "tables": [self._table_to_dict(t) for t in tables],
             }
+        finally:
+            doc.close()
     
     def _extract_chapters(self, doc, toc: List) -> List[Chapter]:
         """Extract chapters using TOC when available, falling back to heading detection."""
         chapters = []
         
         if toc:
-            # Use TOC as primary source
-            for i, toc_item in enumerate(toc):
+            # Filter out invalid TOC entries (bookmark IDs, footnotes, etc.)
+            valid_toc = []
+            for toc_item in toc:
                 if len(toc_item) >= 2:
                     level, title = toc_item[0], toc_item[1]
                     page = toc_item[2] if len(toc_item) > 2 else 0
                     
-                    # Only extract top-level chapters (level 1 or 2)
-                    if level <= 2 and len(title) > 10:
-                        chapter = self._create_chapter_from_toc(doc, title, page, level)
-                        if chapter:
-                            chapters.append(chapter)
-        else:
-            # Fallback to heading detection
+                    # Skip invalid titles (bookmark IDs, footnotes, internal references)
+                    if self._is_valid_chapter_title(title):
+                        valid_toc.append((level, title, page))
+            
+            # Use valid TOC entries
+            for i, (level, title, page) in enumerate(valid_toc):
+                # Only extract top-level chapters (level 1 or 2)
+                if level <= 2:
+                    # Determine end page from next chapter
+                    end_page = valid_toc[i + 1][2] if i + 1 < len(valid_toc) else len(doc)
+                    chapter = self._create_chapter_from_toc(doc, title, page, end_page, level)
+                    if chapter:
+                        chapters.append(chapter)
+        
+        # If TOC yielded no valid chapters, use heading detection
+        if not chapters:
             chapters = self._extract_chapters_by_headings(doc)
         
         return chapters
     
-    def _create_chapter_from_toc(self, doc, title: str, page: int, level: int) -> Optional[Chapter]:
+    def _is_valid_chapter_title(self, title: str) -> bool:
+        """Check if a TOC entry is a valid chapter title (not a bookmark ID)."""
+        if not title or len(title) < 5:
+            return False
+        
+        title_lower = title.lower().strip()
+        
+        # Skip internal bookmark IDs and footnote references
+        invalid_patterns = [
+            r'^tblfn\d*',           # Table footnotes: tblfn1, tblfn3a
+            r'^eha[a-z]\d+',        # ESC article IDs: ehab368, ehac244
+            r'^op-',               # Internal IDs: OP-EHEA210490
+            r'^fig\d*',            # Figure references
+            r'^table\s*\d+$',      # Just "Table 1" without description
+            r'^\d+\.\.\d+$',       # Page ranges: 3227..3337
+            r'^[a-z]{2,4}\d+-',    # Reference IDs: ehy037-TF1
+            r'^\s*$',              # Empty or whitespace
+        ]
+        
+        for pattern in invalid_patterns:
+            if re.match(pattern, title_lower):
+                return False
+        
+        # Must contain at least some readable words
+        words = re.findall(r'[a-zA-Z]{3,}', title)
+        if len(words) < 2:
+            return False
+        
+        return True
+    
+    def _create_chapter_from_toc(self, doc, title: str, start_page: int, end_page: int, level: int) -> Optional[Chapter]:
         """Create a chapter from TOC information."""
-        # Extract text from page range (rough estimate)
-        start_page = max(0, page - 1)
+        # Normalize page numbers
+        start_page = max(0, start_page - 1)  # TOC pages are 1-indexed
+        end_page = min(len(doc), end_page)
         
-        # Estimate end page by finding next major chapter
-        end_page = min(len(doc), start_page + 20)  # Default 20 pages per chapter
-        
-        # Try to be smarter about end page detection
+        # Extract text from page range
         chapter_text = ""
         for p in range(start_page, end_page):
-            page_text = doc[p].get_text()
-            chapter_text += page_text + "\n\n"
-            
-            # Stop if we hit a major heading (rough heuristic)
-            if p > start_page and self._is_major_heading(page_text):
-                break
+            try:
+                page_text = doc[p].get_text()
+                chapter_text += page_text + "\n\n"
+            except Exception:
+                continue
+        
+        # Skip if we got no meaningful content
+        if len(chapter_text.strip()) < 100:
+            return None
         
         return Chapter(
             number=str(level),
@@ -177,12 +223,23 @@ class KnowledgeExtractor:
         current_chapter = None
         
         for page_num in range(len(doc)):
-            page = doc[page]
-            blocks = page.get_text("dict")["blocks"]
+            page_obj = doc[page_num]  # Fixed: use page_num not page
+            try:
+                blocks = page_obj.get_text("dict")["blocks"]
+            except Exception:
+                continue
             
             for block in blocks:
-                if block["type"] == 0:  # Text block
-                    text = block["text"].strip()
+                if block.get("type") == 0:  # Text block
+                    # Get text from lines/spans
+                    block_text = ""
+                    for line in block.get("lines", []):
+                        for span in line.get("spans", []):
+                            block_text += span.get("text", "") + " "
+                    text = block_text.strip()
+                    
+                    if not text:
+                        continue
                     
                     # Detect major headings (all caps, large font, or numbered)
                     if self._is_major_heading(text):
@@ -193,7 +250,7 @@ class KnowledgeExtractor:
                         # Start new chapter
                         current_chapter = Chapter(
                             number=str(len(chapters) + 1),
-                            title=text,
+                            title=text[:200],  # Limit title length
                             start_page=page_num,
                             end_page=page_num,
                             raw_text="",
@@ -204,6 +261,7 @@ class KnowledgeExtractor:
                     elif current_chapter:
                         # Add text to current chapter
                         current_chapter.raw_text += text + "\n"
+                        current_chapter.end_page = page_num
         
         # Don't forget the last chapter
         if current_chapter:
@@ -265,30 +323,50 @@ class KnowledgeExtractor:
         if not table:
             return ""
         
-        rows = []
-        for row in table:
-            row_text = " | ".join([cell or "" for cell in row])
-            rows.append(row_text)
-        
-        return "\n".join(rows)
+        try:
+            # PyMuPDF Table object - use extract() method
+            data = table.extract()
+            if not data:
+                return ""
+            
+            rows = []
+            for row in data:
+                row_text = " | ".join([str(cell) if cell else "" for cell in row])
+                rows.append(row_text)
+            
+            return "\n".join(rows)
+        except Exception as e:
+            # Fallback: try to get text directly
+            try:
+                return str(table)
+            except Exception:
+                return ""
     
     def _extract_table_title(self, doc, page_num: int, bbox: Optional[Tuple]) -> str:
         """Extract table title from text before the table."""
         if not bbox:
             return f"Table on page {page_num + 1}"
         
-        # Look for text above the table bbox
-        page = doc[page_num]
-        text_blocks = page.get_text("dict")["blocks"]
-        
-        title_candidates = []
-        for block in text_blocks:
-            if block["type"] == 0 and block["bbox"][1] < bbox[1]:  # Above the table
-                text = block["text"].strip()
-                if len(text) > 5 and len(text) < 100:
-                    title_candidates.append(text)
-        
-        return title_candidates[0] if title_candidates else f"Table on page {page_num + 1}"
+        try:
+            # Look for text above the table bbox
+            page = doc[page_num]
+            text_blocks = page.get_text("dict").get("blocks", [])
+            
+            title_candidates = []
+            for block in text_blocks:
+                if block.get("type") == 0 and block.get("bbox", [0,0,0,0])[1] < bbox[1]:  # Above the table
+                    # Extract text from lines/spans
+                    block_text = ""
+                    for line in block.get("lines", []):
+                        for span in line.get("spans", []):
+                            block_text += span.get("text", "") + " "
+                    text = block_text.strip()
+                    if len(text) > 5 and len(text) < 100:
+                        title_candidates.append(text)
+            
+            return title_candidates[-1] if title_candidates else f"Table on page {page_num + 1}"
+        except Exception:
+            return f"Table on page {page_num + 1}"
     
     def _assign_tables_to_chapters(self, chapters: List[Chapter], tables: List[Table]):
         """Assign tables to appropriate chapters based on page numbers."""
@@ -299,31 +377,117 @@ class KnowledgeExtractor:
                     break
     
     def _generate_keywords(self, chapters: List[Chapter]):
-        """Generate keywords for each chapter using simple heuristics."""
+        """Generate keywords for each chapter using comprehensive medical term detection."""
         for chapter in chapters:
             # Extract medical terms and key phrases
             text = chapter.raw_text.lower()
-            
-            # Common cardiology terms to look for
             medical_terms = set()
             
-            # Disease/conditions
-            if re.search(r'\b(aortic stenosis|heart failure|atrial fibrillation|pulmonary hypertension|myocardial infarction)\b', text):
-                medical_terms.update(re.findall(r'\b(aortic stenosis|heart failure|atrial fibrillation|pulmonary hypertension|myocardial infarction)\b', text))
+            # Comprehensive cardiology/medical term patterns
+            term_patterns = {
+                # Cardiovascular risk & prevention
+                'cvd_prevention': [
+                    r'score2', r'score2-op', r'ascvd', r'cardiovascular risk', r'cvd risk',
+                    r'primary prevention', r'secondary prevention', r'risk estimation',
+                    r'risk stratification', r'risk factor', r'lifetime risk', r'10-year risk',
+                    r'risk modifier', r'risk calculator', r'framingham',
+                ],
+                # Lipids & cholesterol
+                'lipids': [
+                    r'ldl-c', r'ldl cholesterol', r'hdl-c', r'hdl cholesterol', r'non-hdl',
+                    r'triglyceride', r'cholesterol', r'lipid', r'statin', r'ezetimibe',
+                    r'pcsk9', r'lipoprotein', r'apolipoprotein', r'lp\(a\)', r'dyslipidemia',
+                    r'hypercholesterolemia', r'familial hypercholesterolemia',
+                ],
+                # Blood pressure & hypertension  
+                'hypertension': [
+                    r'blood pressure', r'hypertension', r'systolic', r'diastolic',
+                    r'antihypertensive', r'ace inhibitor', r'arb', r'calcium channel',
+                    r'diuretic', r'beta blocker', r'sbp', r'dbp',
+                ],
+                # Diabetes & metabolism
+                'diabetes': [
+                    r'diabetes', r'diabetic', r'hba1c', r'glucose', r'insulin',
+                    r'sglt2', r'glp-1', r'metformin', r'glycemic', r'metabolic syndrome',
+                ],
+                # Heart failure
+                'heart_failure': [
+                    r'heart failure', r'hfref', r'hfpef', r'hfmref', r'lvef',
+                    r'ejection fraction', r'nt-probnp', r'bnp', r'nyha',
+                    r'cardiomyopathy', r'systolic dysfunction', r'diastolic dysfunction',
+                ],
+                # Arrhythmias
+                'arrhythmias': [
+                    r'atrial fibrillation', r'af', r'arrhythmia', r'bradycardia', r'tachycardia',
+                    r'ventricular tachycardia', r'sudden cardiac death', r'scd',
+                    r'icd', r'pacemaker', r'crt', r'ablation', r'anticoagulation',
+                ],
+                # Valvular disease
+                'valvular': [
+                    r'aortic stenosis', r'aortic regurgitation', r'mitral regurgitation',
+                    r'mitral stenosis', r'tricuspid', r'tavi', r'tavr', r'savr',
+                    r'valve replacement', r'valve repair', r'prosthetic valve',
+                ],
+                # Vascular & atherosclerosis
+                'vascular': [
+                    r'atherosclerosis', r'carotid', r'plaque', r'intima-media',
+                    r'coronary artery', r'peripheral artery', r'aortic', r'aneurysm',
+                    r'cac score', r'calcium score', r'stenosis',
+                ],
+                # Pulmonary
+                'pulmonary': [
+                    r'pulmonary embolism', r'pulmonary hypertension', r'pe',
+                    r'dvt', r'vte', r'thromboemboli', r'anticoagulant',
+                ],
+                # Syncope
+                'syncope': [
+                    r'syncope', r'presyncope', r'transient loss of consciousness',
+                    r'orthostatic', r'vasovagal', r'tilt test',
+                ],
+                # Demographics & modifiers
+                'demographics': [
+                    r'ethnicity', r'ethnic', r'south asian', r'african', r'caucasian',
+                    r'age', r'elderly', r'older', r'sex', r'gender', r'male', r'female',
+                    r'family history', r'hereditary', r'genetic',
+                ],
+                # Lifestyle
+                'lifestyle': [
+                    r'smoking', r'tobacco', r'alcohol', r'obesity', r'bmi',
+                    r'physical activity', r'exercise', r'diet', r'mediterranean',
+                    r'weight', r'sedentary',
+                ],
+                # Clinical assessment
+                'clinical': [
+                    r'echocardiography', r'echo', r'ecg', r'electrocardiogram',
+                    r'stress test', r'angiography', r'catheterization', r'mri', r'ct',
+                    r'biomarker', r'troponin', r'creatinine', r'egfr',
+                ],
+                # Recommendations
+                'recommendations': [
+                    r'class i', r'class ii', r'class iii', r'level a', r'level b', r'level c',
+                    r'recommended', r'should be considered', r'may be considered',
+                    r'indication', r'contraindication', r'guideline',
+                ],
+            }
             
-            # Treatments/procedures
-            if re.search(r'\b(tavi|savr|anticoagulation|beta blocker|ace inhibitor|icd|pci)\b', text):
-                medical_terms.update(re.findall(r'\b(tavi|savr|anticoagulation|beta blocker|ace inhibitor|icd|pci)\b', text))
-            
-            # Clinical concepts
-            if re.search(r'\b(risk stratification|diagnosis|treatment|monitoring|follow up|contraindication)\b', text):
-                medical_terms.update(re.findall(r'\b(risk stratification|diagnosis|treatment|monitoring|follow up|contraindication)\b', text))
+            # Extract all matching terms
+            for category, patterns in term_patterns.items():
+                for pattern in patterns:
+                    matches = re.findall(rf'\b{pattern}\b', text, re.IGNORECASE)
+                    if matches:
+                        # Normalize the term
+                        for match in matches:
+                            normalized = match.lower().strip()
+                            if len(normalized) > 2:
+                                medical_terms.add(normalized)
             
             # Extract unique terms from chapter title
             title_terms = re.findall(r'\b[A-Za-z]{4,}\b', chapter.title.lower())
-            medical_terms.update([term for term in title_terms if len(term) > 4])
+            for term in title_terms:
+                if len(term) > 3 and term not in {'with', 'from', 'that', 'this', 'have', 'been'}:
+                    medical_terms.add(term)
             
-            chapter.keywords = list(medical_terms)[:15]  # Limit to top 15
+            chapter.keywords = list(medical_terms)[:30]  # Increased limit to top 30
     
     def _assess_function_potential(self, chapters: List[Chapter], tables: List[Table]):
         """Assess which chapters/tables could be converted to functions."""
