@@ -217,36 +217,44 @@ def identify_guideline_from_pdf(filepath: str) -> tuple[Optional[str], Optional[
     """
     try:
         import fitz  # PyMuPDF
+        import re
+        
         with fitz.open(filepath) as doc:
             metadata = doc.metadata
             
-            # Get title from metadata or first page
-            title = metadata.get('title', '')
-            if not title and len(doc) > 0:
-                first_page = doc[0].get_text()[:200]
-                # Look for title in first few lines
-                lines = first_page.split('\n')[:5]
-                for line in lines:
-                    line = line.strip()
-                    if len(line) > 20 and ('guidelines' in line.lower() or 'esc' in line.lower()):
-                        title = line
-                        break
-            
-            # Get content for type identification
+            # Get content from first few pages for analysis
             content = ""
-            if len(doc) > 0:
-                content = doc[0].get_text() + doc[1].get_text() if len(doc) > 1 else doc[0].get_text()
+            for i in range(min(3, len(doc))):
+                content += doc[i].get_text() + "\n"
             
-            # Identify type
+            # Try to extract proper ESC guideline title
+            title = _extract_esc_guideline_title(content, metadata)
+            
+            # Identify type from content
             guideline_type = identify_guideline_type(filepath, content)
             
-            # Extract year from title or content
+            # Extract year - try multiple sources
+            year = None
+            
+            # First try filename
             year = extract_year_from_filename(filepath)
+            
+            # Then try title
             if not year and title:
-                import re
                 year_match = re.search(r'20[0-2][0-9]', title)
                 if year_match:
                     year = int(year_match.group())
+            
+            # Then try content
+            if not year:
+                year_match = re.search(r'20[12][0-9]\s+ESC', content)
+                if year_match:
+                    year = int(year_match.group()[:4])
+                else:
+                    # Look for "ESC Guidelines" followed by year
+                    year_match = re.search(r'ESC[^0-9]*?(20[12][0-9])', content[:2000])
+                    if year_match:
+                        year = int(year_match.group(1))
             
             return title, guideline_type, year
             
@@ -258,6 +266,56 @@ def identify_guideline_from_pdf(filepath: str) -> tuple[Optional[str], Optional[
         return None, identify_guideline_type(filepath), extract_year_from_filename(filepath)
 
 
+def _extract_esc_guideline_title(content: str, metadata: dict) -> Optional[str]:
+    """
+    Extract the proper ESC guideline title from PDF content.
+    
+    Looks for patterns like:
+    - "20XX ESC Guidelines for/on..."
+    - "ESC Guidelines for/on..."
+    - "ESC/EACTS Guidelines for..."
+    """
+    import re
+    
+    # Check metadata title first - but skip if it looks like internal ID
+    meta_title = metadata.get('title', '')
+    if meta_title and not meta_title.startswith('OP-') and len(meta_title) > 30:
+        if 'guidelines' in meta_title.lower() or 'esc' in meta_title.lower():
+            return meta_title.strip()
+    
+    # Patterns for ESC guideline titles
+    title_patterns = [
+        # "2021 ESC Guidelines on cardiovascular disease prevention..."
+        r'(20[12][0-9]\s+ESC[/\w\s]*Guidelines\s+(?:for|on)\s+[^.]+?)(?:\n|Developed|Authors)',
+        # "ESC Guidelines for the management of..."
+        r'(ESC[/\w\s]*Guidelines\s+(?:for|on)\s+[^.]+?)(?:\n|Developed|Authors)',
+        # "2022 ESC/ERS Guidelines for the diagnosis..."
+        r'(20[12][0-9]\s+ESC/\w+\s+Guidelines\s+[^.]+?)(?:\n|Developed|Authors)',
+    ]
+    
+    for pattern in title_patterns:
+        match = re.search(pattern, content, re.IGNORECASE | re.DOTALL)
+        if match:
+            title = match.group(1).strip()
+            # Clean up the title
+            title = re.sub(r'\s+', ' ', title)  # Normalize whitespace
+            title = title.replace('\n', ' ')
+            # Truncate if too long (but keep meaningful content)
+            if len(title) > 200:
+                title = title[:200].rsplit(' ', 1)[0] + '...'
+            return title
+    
+    # Fallback: look for any line containing "Guidelines" near the start
+    lines = content[:3000].split('\n')
+    for line in lines[:30]:
+        line = line.strip()
+        if len(line) > 30 and 'guidelines' in line.lower():
+            if 'esc' in line.lower() or '20' in line:
+                return line
+    
+    return None
+
+
 def identify_guideline_type(filename: str, pdf_content: Optional[str] = None) -> Optional[str]:
     """
     Attempt to identify guideline type from filename or PDF content.
@@ -267,28 +325,78 @@ def identify_guideline_type(filename: str, pdf_content: Optional[str] = None) ->
     filename_lower = filename.lower()
     
     # Mapping of keywords to guideline types
+    # Note: More specific patterns should come first to avoid false matches
     keyword_map = {
+        # CVD Prevention (check before "heart failure" to avoid false matches)
+        "cardiovascular disease prevention": "cvd_prevention",
+        "cvd prevention": "cvd_prevention",
+        "score2": "cvd_prevention",
+        "score2-op": "cvd_prevention",
+        "risk estimation": "cvd_prevention",
+        "prevention in clinical practice": "cvd_prevention",
+        
+        # Syncope
+        "syncope": "syncope",
+        "transient loss of consciousness": "syncope",
+        
+        # Sports Cardiology
+        "sports cardiology": "sports_cardiology",
+        "exercise in patients with cardiovascular": "sports_cardiology",
+        "sports and exercise": "sports_cardiology",
+        
+        # Cardiac Pacing & CRT
+        "cardiac pacing": "cardiac_pacing",
+        "pacing and cardiac resynchronization": "cardiac_pacing",
+        "resynchronization therapy": "cardiac_pacing",
+        "crt": "cardiac_pacing",
+        "pacemaker": "cardiac_pacing",
+        
+        # Adult Congenital Heart Disease
+        "adult congenital heart": "congenital_heart_disease",
+        "achd": "congenital_heart_disease",
+        "grown-up congenital": "congenital_heart_disease",
+        "congenital heart": "congenital_heart_disease",
+        
+        # Heart Failure (check after CVD prevention)
+        "acute and chronic heart failure": "heart_failure",
         "heart failure": "heart_failure",
-        "hf ": "heart_failure",
+        "hfref": "heart_failure",
+        "hfpef": "heart_failure",
+        "hfmref": "heart_failure",
+        
+        # Atrial Fibrillation
         "atrial fibrillation": "atrial_fibrillation",
-        " af ": "atrial_fibrillation",
+        
+        # ACS/NSTEMI
         "acute coronary": "acs_nstemi",
         "nste-acs": "acs_nstemi",
         "nstemi": "acs_nstemi",
+        
+        # Valvular Heart Disease
+        "valvular heart disease": "valvular_heart_disease",
         "valvular": "valvular_heart_disease",
         "vhd": "valvular_heart_disease",
+        
+        # Pulmonary Hypertension
         "pulmonary hypertension": "pulmonary_hypertension",
+        
+        # Pulmonary Embolism
         "pulmonary embolism": "pulmonary_embolism",
+        "acute pe": "pulmonary_embolism",
+        
+        # Ventricular Arrhythmias
         "ventricular arrhythmia": "ventricular_arrhythmias",
         "sudden cardiac death": "ventricular_arrhythmias",
-        "scd": "ventricular_arrhythmias",
+        "prevention of sudden cardiac death": "ventricular_arrhythmias",
+        
+        # Cardio-Oncology
         "cardio-oncology": "cardio_oncology",
         "cardiooncology": "cardio_oncology",
-        "congenital heart": "congenital_heart_disease",
-        "sports cardiology": "sports_cardiology",
-        "cardiac pacing": "cardiac_pacing",
-        "cardiovascular disease prevention": "cardiovascular_prevention",
-        "acute and chronic heart failure": "heart_failure",
+        
+        # Peripheral Arterial Disease
+        "peripheral arterial": "peripheral_arterial",
+        "peripheral artery disease": "peripheral_arterial",
+        "pad": "peripheral_arterial",
     }
     
     # First try filename

@@ -5,7 +5,7 @@
       "slug": "ehab368_2021",
       "type": "heart_failure",
       "year": 2021,
-      "title": "OP-EHEA210374 3599..3726",
+      "title": "2021 ESC Guidelines for the diagnosis and treatment of acute and chronic heart failure",
       "chapters_count": 283,
       "source_path": "source_pdfs/ehab368.pdf"
     },
@@ -21,36 +21,36 @@
     "63c5400909d51e3d": {
       "filename": "ehaa605.pdf",
       "slug": "ehaa605_2020",
-      "type": "peripheral_arterial",
+      "type": "sports_cardiology",
       "year": 2020,
-      "title": "OP-EHEA200603 17..96",
+      "title": "2020 ESC Guidelines on sports cardiology and exercise in patients with cardiovascular disease",
       "chapters_count": 9,
       "source_path": "source_pdfs/ehaa605.pdf"
     },
     "1cbdd15997a5c737": {
       "filename": "ehab484.pdf",
       "slug": "ehab484_2021",
-      "type": "other",
+      "type": "cvd_prevention",
       "year": 2021,
-      "title": "OP-EHEA210490 3227..3337",
+      "title": "2021 ESC Guidelines on cardiovascular disease prevention in clinical practice",
       "chapters_count": 129,
       "source_path": "source_pdfs/ehab484.pdf"
     },
     "3b969a390c8475e4": {
       "filename": "ehaa554.pdf",
       "slug": "ehaa554_2020",
-      "type": "valvular_heart_disease",
+      "type": "congenital_heart_disease",
       "year": 2020,
-      "title": "OP-EHEA200554 563..646",
+      "title": "2020 ESC Guidelines for the management of adult congenital heart disease",
       "chapters_count": 116,
       "source_path": "source_pdfs/ehaa554.pdf"
     },
     "9f13e8f9ffb14cbe": {
       "filename": "ehy037.pdf",
       "slug": "ehy037_2018",
-      "type": "other",
+      "type": "syncope",
       "year": 2018,
-      "title": "OP-EHEA180037 1883..1951",
+      "title": "2018 ESC Guidelines for the diagnosis and management of syncope",
       "chapters_count": 92,
       "source_path": "source_pdfs/ehy037.pdf"
     },
@@ -59,16 +59,16 @@
       "slug": "ehz405_2019",
       "type": "pulmonary_embolism",
       "year": 2019,
-      "title": "OP-EHEA190412 543..604",
+      "title": "2019 ESC Guidelines for the diagnosis and management of acute pulmonary embolism",
       "chapters_count": 86,
       "source_path": "source_pdfs/ehz405.pdf"
     },
     "89afc0912150e7c1": {
       "filename": "ehab364.pdf",
       "slug": "ehab364_2021",
-      "type": "heart_failure",
+      "type": "cardiac_pacing",
       "year": 2021,
-      "title": "OP-EHEA210369 1..94",
+      "title": "2021 ESC Guidelines on cardiac pacing and cardiac resynchronization therapy",
       "chapters_count": 309,
       "source_path": "source_pdfs/ehab364.pdf"
     },
@@ -95,7 +95,7 @@
       "slug": "2025_esc_eacts_valvular_heart_disease_ehaf194",
       "type": "valvular_heart_disease",
       "year": 2025,
-      "title": "2025 ESC/EACTS Guidelines for the",
+      "title": "2025 ESC/EACTS Guidelines for the management of valvular heart disease",
       "chapters_count": 27,
       "source_path": "source_pdfs/2025_ESC_EACTS_Valvular_Heart_Disease_ehaf194.pdf"
     }
