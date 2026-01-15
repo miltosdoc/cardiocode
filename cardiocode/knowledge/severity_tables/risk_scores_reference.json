@@ -1,0 +1,134 @@
+{
+  "source": "ESC Guidelines Compilation",
+  "scores": {
+    "cha2ds2_vasc": {
+      "name": "CHA2DS2-VASc",
+      "purpose": "Stroke risk in atrial fibrillation",
+      "guideline": "ESC 2020 AF Guidelines",
+      "components": {
+        "C": {"description": "Congestive heart failure", "points": 1},
+        "H": {"description": "Hypertension", "points": 1},
+        "A2": {"description": "Age ≥75 years", "points": 2},
+        "D": {"description": "Diabetes mellitus", "points": 1},
+        "S2": {"description": "Stroke/TIA/thromboembolism", "points": 2},
+        "V": {"description": "Vascular disease (MI, PAD, aortic plaque)", "points": 1},
+        "A": {"description": "Age 65-74 years", "points": 1},
+        "Sc": {"description": "Sex category (female)", "points": 1}
+      },
+      "max_score": 9,
+      "interpretation": {
+        "0": "Low risk - anticoagulation generally not recommended",
+        "1": "Low-moderate risk - consider anticoagulation (except if female sex only)",
+        "2+": "Moderate-high risk - anticoagulation recommended (Class I)"
+      }
+    },
+    "has_bled": {
+      "name": "HAS-BLED",
+      "purpose": "Bleeding risk assessment",
+      "guideline": "ESC 2020 AF Guidelines",
+      "components": {
+        "H": {"description": "Hypertension (uncontrolled, SBP >160)", "points": 1},
+        "A": {"description": "Abnormal renal/liver function", "points": "1 or 2"},
+        "S": {"description": "Stroke history", "points": 1},
+        "B": {"description": "Bleeding history or predisposition", "points": 1},
+        "L": {"description": "Labile INRs (TTR <60%)", "points": 1},
+        "E": {"description": "Elderly (age >65)", "points": 1},
+        "D": {"description": "Drugs or alcohol", "points": "1 or 2"}
+      },
+      "max_score": 9,
+      "interpretation": {
+        "0-2": "Low-moderate bleeding risk",
+        "3+": "High bleeding risk - does NOT contraindicate anticoagulation, but address modifiable factors"
+      }
+    },
+    "grace_score": {
+      "name": "GRACE Score",
+      "purpose": "ACS risk stratification",
+      "guideline": "ESC 2020 NSTE-ACS Guidelines",
+      "components": ["Age", "Heart rate", "Systolic BP", "Creatinine", "Killip class", "Cardiac arrest", "ST deviation", "Elevated troponin"],
+      "interpretation": {
+        "≤108": "Low risk (<1% in-hospital mortality)",
+        "109-140": "Intermediate risk (1-3% mortality)",
+        ">140": "High risk (>3% mortality)"
+      }
+    },
+    "pesi": {
+      "name": "Pulmonary Embolism Severity Index",
+      "purpose": "30-day mortality in PE",
+      "guideline": "ESC 2019 PE Guidelines",
+      "components": {
+        "age": "Age in years",
+        "male_sex": "+10",
+        "cancer": "+30",
+        "heart_failure": "+10",
+        "chronic_lung_disease": "+10",
+        "pulse_≥110": "+20",
+        "sbp_<100": "+30",
+        "rr_≥30": "+20",
+        "temp_<36": "+20",
+        "altered_mental": "+60",
+        "spo2_<90": "+20"
+      },
+      "classes": {
+        "I": {"score": "≤65", "mortality": "0-1.6%", "risk": "Very low"},
+        "II": {"score": "66-85", "mortality": "1.7-3.5%", "risk": "Low"},
+        "III": {"score": "86-105", "mortality": "3.2-7.1%", "risk": "Intermediate"},
+        "IV": {"score": "106-125", "mortality": "4.0-11.4%", "risk": "High"},
+        "V": {"score": ">125", "mortality": "10.0-24.5%", "risk": "Very high"}
+      }
+    },
+    "spesi": {
+      "name": "Simplified PESI",
+      "purpose": "Simplified 30-day mortality in PE",
+      "guideline": "ESC 2019 PE Guidelines",
+      "components": {
+        "age_>80": 1,
+        "cancer": 1,
+        "chronic_cardiopulmonary_disease": 1,
+        "pulse_>110": 1,
+        "sbp_<100": 1,
+        "spo2_<90": 1
+      },
+      "interpretation": {
+        "0": "Low risk (1.0% mortality) - consider outpatient treatment",
+        "≥1": "High risk (10.9% mortality) - hospital admission"
+      }
+    },
+    "wells_pe": {
+      "name": "Wells Score for PE",
+      "purpose": "Pre-test probability of PE",
+      "guideline": "ESC 2019 PE Guidelines",
+      "components": {
+        "clinical_dvt_signs": 3.0,
+        "pe_most_likely_diagnosis": 3.0,
+        "heart_rate_>100": 1.5,
+        "immobilization_surgery_4_weeks": 1.5,
+        "previous_pe_dvt": 1.5,
+        "hemoptysis": 1.0,
+        "active_cancer": 1.0
+      },
+      "interpretation": {
+        "two_level": {
+          "≤4": "PE unlikely - D-dimer testing",
+          ">4": "PE likely - CTPA recommended"
+        },
+        "three_level": {
+          "0-1": "Low probability",
+          "2-6": "Moderate probability",
+          "≥7": "High probability"
+        }
+      }
+    },
+    "hcm_risk_scd": {
+      "name": "HCM Risk-SCD",
+      "purpose": "5-year sudden cardiac death risk in HCM",
+      "guideline": "ESC 2014/2022 HCM Guidelines",
+      "components": ["Age", "Max wall thickness", "LA diameter", "Max LVOT gradient", "Family history SCD", "NSVT", "Unexplained syncope"],
+      "interpretation": {
+        "<4%": "Low risk - ICD generally not indicated",
+        "4-6%": "Intermediate risk - ICD may be considered (Class IIb)",
+        "≥6%": "High risk - ICD should be considered (Class IIa)"
+      }
+    }
+  }
+}

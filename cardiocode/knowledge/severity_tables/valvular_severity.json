@@ -1,0 +1,148 @@
+{
+  "source": "ESC/EACTS 2025 Valvular Heart Disease Guidelines",
+  "tables": {
+    "aortic_stenosis": {
+      "parameters": ["peak_velocity", "mean_gradient", "ava", "indexed_ava"],
+      "severity_grades": {
+        "mild": {
+          "peak_velocity": "<3.0 m/s",
+          "mean_gradient": "<20 mmHg",
+          "ava": ">1.5 cm²",
+          "indexed_ava": ">0.85 cm²/m²"
+        },
+        "moderate": {
+          "peak_velocity": "3.0-3.9 m/s",
+          "mean_gradient": "20-39 mmHg",
+          "ava": "1.0-1.5 cm²",
+          "indexed_ava": "0.60-0.85 cm²/m²"
+        },
+        "severe": {
+          "peak_velocity": "≥4.0 m/s",
+          "mean_gradient": "≥40 mmHg",
+          "ava": "≤1.0 cm²",
+          "indexed_ava": "≤0.60 cm²/m²"
+        },
+        "very_severe": {
+          "peak_velocity": ">5.0 m/s",
+          "mean_gradient": "≥60 mmHg",
+          "ava": "≤1.0 cm²"
+        }
+      },
+      "special_categories": {
+        "low_flow_low_gradient_reduced_ef": {
+          "criteria": ["AVA ≤1.0 cm²", "Mean gradient <40 mmHg", "LVEF <50%", "SVI ≤35 mL/m²"],
+          "notes": "Dobutamine stress echo or CT calcium scoring recommended"
+        },
+        "paradoxical_low_flow_low_gradient": {
+          "criteria": ["AVA ≤1.0 cm²", "Mean gradient <40 mmHg", "LVEF ≥50%", "SVI ≤35 mL/m²"],
+          "notes": "CT calcium score: Men >2000, Women >1200 AU suggests severe"
+        }
+      }
+    },
+    "aortic_regurgitation": {
+      "parameters": ["vena_contracta", "eroa", "regurgitant_volume", "regurgitant_fraction"],
+      "severity_grades": {
+        "mild": {
+          "vena_contracta": "<3 mm",
+          "eroa": "<10 mm²",
+          "regurgitant_volume": "<30 mL",
+          "regurgitant_fraction": "<30%"
+        },
+        "moderate": {
+          "vena_contracta": "3-6 mm",
+          "eroa": "10-29 mm²",
+          "regurgitant_volume": "30-59 mL",
+          "regurgitant_fraction": "30-49%"
+        },
+        "severe": {
+          "vena_contracta": "≥6 mm",
+          "eroa": "≥30 mm²",
+          "regurgitant_volume": "≥60 mL",
+          "regurgitant_fraction": "≥50%"
+        }
+      },
+      "lv_dilatation_thresholds": {
+        "intervention_class_I": {
+          "lvesd": ">50 mm",
+          "lvesdi": ">25 mm/m²",
+          "lvef": "≤50%"
+        },
+        "intervention_class_IIb": {
+          "lvesdi": ">22 mm/m²",
+          "lvesvi": ">45 mL/m²",
+          "lvef": "≤55%"
+        }
+      }
+    },
+    "mitral_regurgitation": {
+      "parameters": ["vena_contracta", "eroa", "regurgitant_volume", "regurgitant_fraction"],
+      "severity_grades": {
+        "mild": {
+          "vena_contracta": "<3 mm",
+          "eroa": "<20 mm²",
+          "regurgitant_volume": "<30 mL",
+          "regurgitant_fraction": "<30%"
+        },
+        "moderate": {
+          "vena_contracta": "3-6 mm",
+          "eroa": "20-39 mm²",
+          "regurgitant_volume": "30-59 mL",
+          "regurgitant_fraction": "30-49%"
+        },
+        "severe": {
+          "vena_contracta": "≥7 mm",
+          "eroa": "≥40 mm²",
+          "regurgitant_volume": "≥60 mL",
+          "regurgitant_fraction": "≥50%"
+        }
+      },
+      "secondary_mr_severe_criteria": {
+        "eroa": "≥20 mm²",
+        "regurgitant_volume": "≥30 mL",
+        "notes": "Lower thresholds for secondary MR due to prognostic significance"
+      }
+    },
+    "mitral_stenosis": {
+      "parameters": ["mva", "mean_gradient", "spap"],
+      "severity_grades": {
+        "mild": {
+          "mva": ">1.5 cm²",
+          "mean_gradient": "<5 mmHg"
+        },
+        "moderate": {
+          "mva": "1.0-1.5 cm²",
+          "mean_gradient": "5-10 mmHg"
+        },
+        "severe": {
+          "mva": "<1.0 cm²",
+          "mean_gradient": ">10 mmHg"
+        }
+      }
+    },
+    "tricuspid_regurgitation": {
+      "parameters": ["vena_contracta", "eroa", "hepatic_vein_reversal"],
+      "severity_grades": {
+        "mild": {
+          "vena_contracta": "<3 mm",
+          "eroa": "<20 mm²"
+        },
+        "moderate": {
+          "vena_contracta": "3-6 mm",
+          "eroa": "20-39 mm²"
+        },
+        "severe": {
+          "vena_contracta": "≥7 mm",
+          "eroa": "≥40 mm²",
+          "hepatic_vein_reversal": "systolic"
+        },
+        "torrential": {
+          "vena_contracta": "≥14 mm",
+          "eroa": "≥60 mm²"
+        }
+      },
+      "annulus_dilatation": {
+        "threshold": "≥40 mm or ≥21 mm/m²"
+      }
+    }
+  }
+}
