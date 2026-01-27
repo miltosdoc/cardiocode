@@ -63,6 +63,7 @@ setup(
     entry_points={
         "console_scripts": [
             "cardiocode-mcp=cardiocode.mcp.server:main",
+            "cardiocode=cardiocode.mcp.server:main",
         ],
     },
     include_package_data=True,

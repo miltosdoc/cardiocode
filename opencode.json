@@ -4,7 +4,10 @@
     "cardiocode": {
       "type": "local",
       "command": ["python", "-m", "cardiocode.mcp.server"],
-      "enabled": true
+      "enabled": true,
+      "env": {
+        "PYTHONPATH": "."
+      }
     }
   }
 }

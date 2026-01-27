@@ -989,6 +989,582 @@ def tool_acknowledge_pdf_notification(
 
 
 # =============================================================================
+# PULMONARY EMBOLISM TOOLS (ESC 2019)
+# =============================================================================
+
+def tool_calculate_pesi(
+    age: str,
+    male: str = "true",
+    cancer: str = "false",
+    heart_failure: str = "false",
+    chronic_lung_disease: str = "false",
+    heart_rate_110_plus: str = "false",
+    systolic_bp_below_100: str = "false",
+    respiratory_rate_30_plus: str = "false",
+    temperature_below_36: str = "false",
+    altered_mental_status: str = "false",
+    o2_saturation_below_90: str = "false",
+) -> Dict[str, Any]:
+    """
+    Calculate Pulmonary Embolism Severity Index (PESI) score for 30-day mortality.
+
+    Args:
+        age: Patient age (points = age in years)
+        male: Male sex (+10 points)
+        cancer: Active cancer (+30 points)
+        heart_failure: Chronic heart failure (+10 points)
+        chronic_lung_disease: Chronic lung disease (+10 points)
+        heart_rate_110_plus: Heart rate >= 110 bpm (+20 points)
+        systolic_bp_below_100: SBP < 100 mmHg (+30 points)
+        respiratory_rate_30_plus: RR >= 30/min (+20 points)
+        temperature_below_36: Temperature < 36°C (+20 points)
+        altered_mental_status: Altered mental status (+60 points)
+        o2_saturation_below_90: O2 saturation < 90% (+20 points)
+
+    Returns:
+        PESI score with risk class and 30-day mortality estimate
+    """
+    from cardiocode.guidelines.pulmonary_embolism.diagnosis import calculate_pesi_score
+
+    result = calculate_pesi_score(
+        age=_to_int(age, 65) or 65,
+        male=_to_bool(male),
+        cancer=_to_bool(cancer),
+        heart_failure=_to_bool(heart_failure),
+        chronic_lung_disease=_to_bool(chronic_lung_disease),
+        heart_rate_110_plus=_to_bool(heart_rate_110_plus),
+        systolic_bp_below_100=_to_bool(systolic_bp_below_100),
+        respiratory_rate_30_plus=_to_bool(respiratory_rate_30_plus),
+        temperature_below_36=_to_bool(temperature_below_36),
+        altered_mental_status=_to_bool(altered_mental_status),
+        spo2_below_90=_to_bool(o2_saturation_below_90),
+    )
+
+    return {
+        "score": result.score,
+        "risk_class": result.risk_class.value,
+        "mortality_risk": result.mortality_risk,
+        "interpretation": result.interpretation,
+        "can_treat_outpatient": result.can_treat_outpatient,
+        "components": result.components,
+    }
+
+
+def tool_calculate_spesi(
+    age_over_80: str = "false",
+    cancer: str = "false",
+    chronic_cardiopulmonary_disease: str = "false",
+    pulse_over_110: str = "false",
+    systolic_bp_under_100: str = "false",
+    o2_saturation_under_90: str = "false",
+) -> Dict[str, Any]:
+    """
+    Calculate Simplified PESI (sPESI) score for PE risk stratification.
+
+    Args:
+        age_over_80: Age > 80 years (1 point)
+        cancer: Active cancer (1 point)
+        chronic_cardiopulmonary_disease: Chronic heart or lung disease (1 point)
+        pulse_over_110: Heart rate >= 110 bpm (1 point)
+        systolic_bp_under_100: SBP < 100 mmHg (1 point)
+        o2_saturation_under_90: O2 saturation < 90% (1 point)
+
+    Returns:
+        sPESI score with risk assessment (0 = low risk, >=1 = high risk)
+    """
+    from cardiocode.guidelines.pulmonary_embolism.diagnosis import calculate_simplified_pesi
+
+    result = calculate_simplified_pesi(
+        age_over_80=_to_bool(age_over_80),
+        cancer=_to_bool(cancer),
+        chronic_cardiopulmonary_disease=_to_bool(chronic_cardiopulmonary_disease),
+        heart_rate_110_plus=_to_bool(pulse_over_110),
+        systolic_bp_below_100=_to_bool(systolic_bp_under_100),
+        spo2_below_90=_to_bool(o2_saturation_under_90),
+    )
+
+    return {
+        "score": result.score,
+        "high_risk": result.high_risk,
+        "mortality_30_day": result.mortality_30_day,
+        "interpretation": result.interpretation,
+        "can_treat_outpatient": result.can_treat_outpatient,
+        "components": result.components,
+    }
+
+
+def tool_calculate_geneva_pe(
+    age_over_65: str = "false",
+    previous_pe_dvt: str = "false",
+    surgery_fracture_past_month: str = "false",
+    active_cancer: str = "false",
+    unilateral_leg_pain: str = "false",
+    hemoptysis: str = "false",
+    heart_rate: str = "75",
+    dvt_signs: str = "false",
+    simplified: str = "false",
+) -> Dict[str, Any]:
+    """
+    Calculate Revised Geneva Score for PE pre-test probability.
+
+    Args:
+        age_over_65: Age > 65 years
+        previous_pe_dvt: Previous PE or DVT
+        surgery_fracture_past_month: Surgery or fracture within 1 month
+        active_cancer: Active malignancy
+        unilateral_leg_pain: Unilateral lower limb pain
+        hemoptysis: Hemoptysis
+        heart_rate: Heart rate (bpm) - used to determine 75-94 or >=95
+        dvt_signs: Pain on leg palpation and unilateral edema
+        simplified: Use simplified version (all items = 1 point)
+
+    Returns:
+        Geneva score with PE probability category
+    """
+    from cardiocode.guidelines.pulmonary_embolism.diagnosis import calculate_revised_geneva_score
+
+    hr = _to_int(heart_rate, 75) or 75
+    hr_75_94 = 75 <= hr < 95
+    hr_95_plus = hr >= 95
+
+    result = calculate_revised_geneva_score(
+        age_over_65=_to_bool(age_over_65),
+        previous_pe_dvt=_to_bool(previous_pe_dvt),
+        surgery_or_fracture=_to_bool(surgery_fracture_past_month),
+        active_malignancy=_to_bool(active_cancer),
+        unilateral_leg_pain=_to_bool(unilateral_leg_pain),
+        hemoptysis=_to_bool(hemoptysis),
+        heart_rate_75_94=hr_75_94,
+        heart_rate_95_plus=hr_95_plus,
+        leg_pain_on_palpation_and_edema=_to_bool(dvt_signs),
+    )
+
+    return {
+        "score": result.score,
+        "probability": result.probability.value,
+        "interpretation": result.interpretation,
+        "recommendation": result.recommendation,
+        "components": result.components,
+    }
+
+
+def tool_age_adjusted_ddimer(
+    age: str,
+    baseline_cutoff: str = "500",
+) -> Dict[str, Any]:
+    """
+    Calculate age-adjusted D-dimer cutoff for PE exclusion.
+
+    Args:
+        age: Patient age in years
+        baseline_cutoff: Baseline D-dimer cutoff (default 500 ng/mL)
+
+    Returns:
+        Age-adjusted D-dimer cutoff
+    """
+    age_int = _to_int(age, 50) or 50
+    baseline = _to_float(baseline_cutoff, 500.0) or 500.0
+
+    if age_int <= 50:
+        cutoff = baseline
+        adjustment = "No age adjustment needed for age <= 50"
+    else:
+        cutoff = age_int * 10  # age x 10 ng/mL for patients > 50
+        adjustment = f"Age-adjusted cutoff = age × 10 = {cutoff} ng/mL"
+
+    return {
+        "age": age_int,
+        "baseline_cutoff": baseline,
+        "age_adjusted_cutoff": cutoff,
+        "adjustment_explanation": adjustment,
+        "interpretation": f"D-dimer < {cutoff} ng/mL can help exclude PE in patients with low/intermediate clinical probability",
+    }
+
+
+# =============================================================================
+# HYPERTENSION TOOLS (ESC 2024)
+# =============================================================================
+
+def tool_classify_blood_pressure(
+    systolic: str,
+    diastolic: str,
+) -> Dict[str, Any]:
+    """
+    Classify blood pressure according to ESC 2024 guidelines.
+
+    Args:
+        systolic: Systolic blood pressure (mmHg)
+        diastolic: Diastolic blood pressure (mmHg)
+
+    Returns:
+        BP category, interpretation, and recommendations
+    """
+    from cardiocode.guidelines.hypertension.diagnosis import classify_blood_pressure
+
+    result = classify_blood_pressure(
+        systolic=_to_int(systolic, 120) or 120,
+        diastolic=_to_int(diastolic, 80) or 80,
+    )
+
+    return {
+        "systolic": result.systolic,
+        "diastolic": result.diastolic,
+        "category": result.category.value,
+        "interpretation": result.interpretation,
+        "requires_confirmation": result.requires_confirmation,
+        "recommendation": result.recommendation,
+    }
+
+
+def tool_assess_hypertension_risk(
+    systolic: str,
+    diastolic: str,
+    age: str,
+    male: str = "true",
+    smoking: str = "false",
+    diabetes: str = "false",
+    dyslipidemia: str = "false",
+    obesity: str = "false",
+    family_history_cvd: str = "false",
+    lvh: str = "false",
+    ckd: str = "false",
+    established_cvd: str = "false",
+) -> Dict[str, Any]:
+    """
+    Assess cardiovascular risk in hypertension per ESC 2024 guidelines.
+
+    Args:
+        systolic: Systolic BP (mmHg)
+        diastolic: Diastolic BP (mmHg)
+        age: Patient age
+        male: Male sex
+        smoking: Current smoker
+        diabetes: Diabetes mellitus
+        dyslipidemia: Dyslipidemia
+        obesity: BMI >= 30
+        family_history_cvd: Family history of premature CVD
+        lvh: Left ventricular hypertrophy
+        ckd: Chronic kidney disease stage 3+
+        established_cvd: Established cardiovascular disease
+
+    Returns:
+        CV risk category and treatment recommendations
+    """
+    from cardiocode.guidelines.hypertension.diagnosis import classify_blood_pressure, assess_cv_risk
+
+    bp_result = classify_blood_pressure(
+        systolic=_to_int(systolic, 140) or 140,
+        diastolic=_to_int(diastolic, 90) or 90,
+    )
+
+    risk_result = assess_cv_risk(
+        bp_category=bp_result.category,
+        age=_to_int(age, 50) or 50,
+        male=_to_bool(male),
+        smoking=_to_bool(smoking),
+        diabetes=_to_bool(diabetes),
+        dyslipidemia=_to_bool(dyslipidemia),
+        obesity=_to_bool(obesity),
+        family_history_cvd=_to_bool(family_history_cvd),
+        lvh=_to_bool(lvh),
+        ckd_stage_3=_to_bool(ckd),
+        coronary_artery_disease=_to_bool(established_cvd),
+    )
+
+    return {
+        "bp_category": bp_result.category.value,
+        "cv_risk_category": risk_result.risk_category.value,
+        "risk_factors": risk_result.risk_factors,
+        "hmod": risk_result.hmod,
+        "established_cvd": risk_result.established_cvd,
+        "interpretation": risk_result.interpretation,
+        "treatment_threshold": risk_result.treatment_threshold,
+    }
+
+
+# =============================================================================
+# CV PREVENTION TOOLS (ESC 2021)
+# =============================================================================
+
+def tool_calculate_score2(
+    age: str,
+    sex: str,
+    smoking: str = "false",
+    systolic_bp: str = "120",
+    non_hdl_cholesterol: str = "4.0",
+    region: str = "moderate",
+) -> Dict[str, Any]:
+    """
+    Calculate SCORE2 10-year cardiovascular risk (ages 40-69).
+
+    Args:
+        age: Patient age (40-69 years)
+        sex: "male" or "female"
+        smoking: Current smoker
+        systolic_bp: Systolic blood pressure (mmHg)
+        non_hdl_cholesterol: Non-HDL cholesterol (mmol/L)
+        region: European risk region (low, moderate, high, very_high)
+
+    Returns:
+        10-year CV risk percentage and risk category
+    """
+    from cardiocode.guidelines.cv_prevention.risk_assessment import calculate_score2, RiskRegion
+
+    region_map = {
+        "low": RiskRegion.LOW,
+        "moderate": RiskRegion.MODERATE,
+        "high": RiskRegion.HIGH,
+        "very_high": RiskRegion.VERY_HIGH,
+    }
+
+    result = calculate_score2(
+        age=_to_int(age, 50) or 50,
+        sex=_to_str(sex, "male") or "male",
+        smoking=_to_bool(smoking),
+        systolic_bp=_to_int(systolic_bp, 120) or 120,
+        non_hdl_cholesterol=_to_float(non_hdl_cholesterol, 4.0) or 4.0,
+        region=region_map.get(region.lower(), RiskRegion.MODERATE),
+    )
+
+    return {
+        "risk_percent": result.risk_percent,
+        "risk_level": result.risk_level.value,
+        "interpretation": result.interpretation,
+        "recommendations": result.recommendations,
+        "components": result.components,
+    }
+
+
+def tool_get_lipid_targets(
+    risk_level: str,
+) -> Dict[str, Any]:
+    """
+    Get LDL-C targets based on cardiovascular risk level.
+
+    Args:
+        risk_level: CV risk level (low_to_moderate, high, very_high)
+
+    Returns:
+        LDL-C targets in mmol/L and mg/dL
+    """
+    from cardiocode.guidelines.cv_prevention.risk_assessment import CVRiskLevel
+    from cardiocode.guidelines.cv_prevention.treatment import get_lipid_targets
+
+    level_map = {
+        "low": CVRiskLevel.LOW_MODERATE,
+        "low_to_moderate": CVRiskLevel.LOW_MODERATE,
+        "moderate": CVRiskLevel.LOW_MODERATE,
+        "high": CVRiskLevel.HIGH,
+        "very_high": CVRiskLevel.VERY_HIGH,
+    }
+
+    level = level_map.get(risk_level.lower(), CVRiskLevel.LOW_MODERATE)
+    result = get_lipid_targets(level)
+
+    return {
+        "risk_level": level.value,
+        "ldl_target_mmol": result.ldl_target_mmol,
+        "ldl_target_mg_dl": result.ldl_target_mg,
+        "ldl_reduction_percent": result.ldl_reduction_percent,
+        "additional_targets": result.additional_targets,
+    }
+
+
+# =============================================================================
+# PERIPHERAL ARTERIAL DISEASE TOOLS (ESC 2024)
+# =============================================================================
+
+def tool_calculate_abi(
+    ankle_systolic_right: str = "",
+    ankle_systolic_left: str = "",
+    brachial_systolic: str = "120",
+) -> Dict[str, Any]:
+    """
+    Calculate Ankle-Brachial Index (ABI) for PAD diagnosis.
+
+    Args:
+        ankle_systolic_right: Right ankle systolic pressure (mmHg)
+        ankle_systolic_left: Left ankle systolic pressure (mmHg)
+        brachial_systolic: Higher arm systolic pressure (mmHg)
+
+    Returns:
+        ABI values with interpretation and PAD diagnosis
+    """
+    from cardiocode.guidelines.peripheral_arterial.diagnosis import calculate_abi
+
+    result = calculate_abi(
+        ankle_systolic_right=_to_int(ankle_systolic_right) if ankle_systolic_right else None,
+        ankle_systolic_left=_to_int(ankle_systolic_left) if ankle_systolic_left else None,
+        brachial_systolic=_to_int(brachial_systolic, 120) or 120,
+    )
+
+    return {
+        "abi_right": result.abi_right,
+        "abi_left": result.abi_left,
+        "interpretation": result.interpretation,
+        "pad_present": result.pad_present,
+        "severity": result.severity,
+        "recommendations": result.recommendations,
+    }
+
+
+def tool_assess_aaa(
+    diameter_cm: str,
+    male: str = "true",
+    growth_rate_cm_year: str = "",
+    symptomatic: str = "false",
+) -> Dict[str, Any]:
+    """
+    Assess abdominal aortic aneurysm (AAA) and determine management.
+
+    Args:
+        diameter_cm: Maximum aortic diameter (cm)
+        male: Male patient (females have lower intervention threshold)
+        growth_rate_cm_year: Growth rate if known (cm/year)
+        symptomatic: Symptomatic AAA (pain, tenderness)
+
+    Returns:
+        AAA classification, surveillance interval, and intervention recommendation
+    """
+    from cardiocode.guidelines.peripheral_arterial.diagnosis import classify_aaa
+
+    result = classify_aaa(
+        diameter_cm=_to_float(diameter_cm, 3.0) or 3.0,
+        male=_to_bool(male),
+        growth_rate_cm_year=_to_float(growth_rate_cm_year) if growth_rate_cm_year else None,
+        symptomatic=_to_bool(symptomatic),
+    )
+
+    return {
+        "diameter_cm": result.diameter_cm,
+        "size_category": result.size_category.value,
+        "growth_rate": result.growth_rate_cm_year,
+        "intervention_threshold_reached": result.intervention_threshold,
+        "surveillance_interval": result.surveillance_interval,
+        "recommendations": result.recommendations,
+    }
+
+
+# =============================================================================
+# SYNCOPE TOOLS (ESC 2018)
+# =============================================================================
+
+def tool_assess_syncope_risk(
+    age: str,
+    known_heart_disease: str = "false",
+    heart_failure: str = "false",
+    abnormal_ecg: str = "false",
+    syncope_during_exertion: str = "false",
+    syncope_supine: str = "false",
+    palpitations_before: str = "false",
+    family_history_scd: str = "false",
+    systolic_bp: str = "",
+    heart_rate: str = "",
+) -> Dict[str, Any]:
+    """
+    Risk stratify syncope for disposition decisions (ESC 2018).
+
+    Args:
+        age: Patient age
+        known_heart_disease: Structural heart disease
+        heart_failure: Heart failure
+        abnormal_ecg: ECG abnormalities
+        syncope_during_exertion: Exertional syncope
+        syncope_supine: Syncope while supine
+        palpitations_before: Palpitations before event
+        family_history_scd: Family SCD <40 years
+        systolic_bp: Systolic BP (mmHg)
+        heart_rate: Heart rate (bpm)
+
+    Returns:
+        Risk level (low/intermediate/high) and disposition recommendation
+    """
+    from cardiocode.guidelines.syncope.diagnosis import assess_risk
+
+    result = assess_risk(
+        age=_to_int(age, 50) or 50,
+        known_heart_disease=_to_bool(known_heart_disease),
+        known_heart_failure=_to_bool(heart_failure),
+        abnormal_ecg=_to_bool(abnormal_ecg),
+        syncope_during_exertion=_to_bool(syncope_during_exertion),
+        syncope_supine=_to_bool(syncope_supine),
+        palpitations_before=_to_bool(palpitations_before),
+        family_history_scd=_to_bool(family_history_scd),
+        systolic_bp=_to_int(systolic_bp) if systolic_bp else None,
+        heart_rate=_to_int(heart_rate) if heart_rate else None,
+    )
+
+    return {
+        "risk_level": result.risk_level.value,
+        "high_risk_features": result.high_risk_features,
+        "low_risk_features": result.low_risk_features,
+        "disposition": result.disposition,
+        "recommendations": result.recommendations,
+    }
+
+
+def tool_classify_syncope(
+    prodrome_autonomic: str = "false",
+    trigger_standing: str = "false",
+    trigger_emotion_pain: str = "false",
+    trigger_situational: str = "false",
+    exertional: str = "false",
+    supine_onset: str = "false",
+    palpitations_before: str = "false",
+    known_heart_disease: str = "false",
+    abnormal_ecg: str = "false",
+) -> Dict[str, Any]:
+    """
+    Classify syncope etiology based on clinical features.
+
+    Args:
+        prodrome_autonomic: Autonomic prodrome (nausea, warmth, sweating)
+        trigger_standing: Triggered by prolonged standing
+        trigger_emotion_pain: Triggered by pain, emotion, fear
+        trigger_situational: Situational (micturition, cough, defecation)
+        exertional: Occurred during exertion
+        supine_onset: Occurred while supine
+        palpitations_before: Palpitations immediately before
+        known_heart_disease: Known structural heart disease
+        abnormal_ecg: Abnormal ECG
+
+    Returns:
+        Likely syncope type and recommended evaluation
+    """
+    from cardiocode.guidelines.syncope.diagnosis import classify_syncope
+
+    # Determine trigger type
+    trigger_type = None
+    if _to_bool(trigger_situational):
+        trigger_type = "situational"
+    elif _to_bool(trigger_standing):
+        trigger_type = "standing"
+    elif _to_bool(trigger_emotion_pain):
+        trigger_type = "emotion"
+
+    result = classify_syncope(
+        prodrome_present=_to_bool(prodrome_autonomic),
+        prodrome_type="autonomic" if _to_bool(prodrome_autonomic) else None,
+        trigger_present=trigger_type is not None,
+        trigger_type=trigger_type,
+        position_at_onset="supine" if _to_bool(supine_onset) else "standing" if _to_bool(trigger_standing) else None,
+        known_heart_disease=_to_bool(known_heart_disease),
+        palpitations_before=_to_bool(palpitations_before),
+        exertional=_to_bool(exertional),
+        supine_onset=_to_bool(supine_onset),
+        ecg_abnormal=_to_bool(abnormal_ecg),
+    )
+
+    return {
+        "syncope_type": result.syncope_type.value,
+        "confidence": result.confidence,
+        "supporting_features": result.supporting_features,
+        "against_features": result.against_features,
+        "further_testing": result.further_testing,
+    }
+
+
+# =============================================================================
 # TOOL REGISTRY
 # =============================================================================
 
@@ -1078,6 +1654,59 @@ TOOL_REGISTRY = {
     "acknowledge_pdf_notification": {
         "function": tool_acknowledge_pdf_notification,
         "description": "Acknowledge a PDF notification",
+    },
+    # Pulmonary Embolism tools (ESC 2019)
+    "calculate_pesi": {
+        "function": tool_calculate_pesi,
+        "description": "Calculate Pulmonary Embolism Severity Index (PESI) score for 30-day mortality",
+    },
+    "calculate_spesi": {
+        "function": tool_calculate_spesi,
+        "description": "Calculate Simplified PESI (sPESI) score for PE risk stratification",
+    },
+    "calculate_geneva_pe": {
+        "function": tool_calculate_geneva_pe,
+        "description": "Calculate Revised Geneva Score for PE pre-test probability",
+    },
+    "calculate_age_adjusted_ddimer": {
+        "function": tool_age_adjusted_ddimer,
+        "description": "Calculate age-adjusted D-dimer cutoff for PE exclusion",
+    },
+    # Hypertension tools (ESC 2024)
+    "classify_blood_pressure": {
+        "function": tool_classify_blood_pressure,
+        "description": "Classify blood pressure according to ESC 2024 guidelines",
+    },
+    "assess_hypertension_risk": {
+        "function": tool_assess_hypertension_risk,
+        "description": "Assess cardiovascular risk in hypertension (ESC 2024)",
+    },
+    # CV Prevention tools (ESC 2021)
+    "calculate_score2": {
+        "function": tool_calculate_score2,
+        "description": "Calculate SCORE2 10-year cardiovascular risk (ESC 2021)",
+    },
+    "get_lipid_targets": {
+        "function": tool_get_lipid_targets,
+        "description": "Get LDL-C targets based on cardiovascular risk level (ESC 2021)",
+    },
+    # Peripheral Arterial Disease tools (ESC 2024)
+    "calculate_abi": {
+        "function": tool_calculate_abi,
+        "description": "Calculate Ankle-Brachial Index (ABI) for PAD diagnosis",
+    },
+    "assess_aaa": {
+        "function": tool_assess_aaa,
+        "description": "Assess abdominal aortic aneurysm (AAA) management (ESC 2024)",
+    },
+    # Syncope tools (ESC 2018)
+    "assess_syncope_risk": {
+        "function": tool_assess_syncope_risk,
+        "description": "Risk stratify syncope for disposition decisions (ESC 2018)",
+    },
+    "classify_syncope": {
+        "function": tool_classify_syncope,
+        "description": "Classify syncope etiology based on clinical features (ESC 2018)",
     },
 }
 
