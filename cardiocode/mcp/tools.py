@@ -1646,25 +1646,31 @@ def tool_process_pdfs() -> Dict[str, Any]:
     return process_all_pdfs()
 
 
-def tool_search_knowledge(query: str, max_results: str = "5") -> Dict[str, Any]:
+def tool_search_knowledge(query: str, max_results: str = "3") -> Dict[str, Any]:
     """
     Search the extracted guideline knowledge base.
-    
+
     Args:
         query: Clinical question or topic to search for
-        max_results: Maximum number of results (default 5)
-    
+        max_results: Maximum number of results (default 3)
+
     Returns:
-        Ranked search results with chapter previews
+        Ranked search results with short previews (use get_chapter for full content)
     """
     from cardiocode.knowledge.search import search_knowledge
-    
-    results = search_knowledge(query, _to_int(max_results, 5))
-    
+
+    results = search_knowledge(query, _to_int(max_results, 3))
+
+    # Truncate previews to save tokens
+    for r in results:
+        if "preview" in r and len(r["preview"]) > 500:
+            r["preview"] = r["preview"][:500] + "..."
+
     return {
         "query": query,
         "results_count": len(results),
         "results": results,
+        "hint": "Use get_chapter with guideline_slug and chapter_title for full content"
     }
 
 
@@ -1679,22 +1685,32 @@ def tool_get_knowledge_status() -> Dict[str, Any]:
     return get_knowledge_status()
 
 
-def tool_get_chapter(guideline_slug: str, chapter_title: str) -> Dict[str, Any]:
+def tool_get_chapter(guideline_slug: str, chapter_title: str, max_chars: str = "3000") -> Dict[str, Any]:
     """
-    Get full content of a specific chapter.
-    
+    Get content of a specific chapter (truncated to save tokens).
+
     Args:
         guideline_slug: Slug identifier for the guideline (from search results)
         chapter_title: Title of the chapter to retrieve
-    
+        max_chars: Maximum characters to return (default 3000, use "0" for full)
+
     Returns:
-        Full chapter content with tables
+        Chapter content (truncated unless max_chars=0)
     """
     from cardiocode.knowledge.search import get_chapter_content
-    
+
     result = get_chapter_content(guideline_slug, chapter_title)
     if result is None:
         return {"error": f"Chapter not found: {chapter_title} in {guideline_slug}"}
+
+    # Truncate content to save tokens
+    limit = _to_int(max_chars, 3000)
+    if limit > 0 and "chapter" in result and "content" in result["chapter"]:
+        content = result["chapter"]["content"]
+        if len(content) > limit:
+            result["chapter"]["content"] = content[:limit] + f"\n\n... [truncated, {len(content) - limit} more chars available - use max_chars='0' for full]"
+            result["truncated"] = True
+
     return result
 
 
