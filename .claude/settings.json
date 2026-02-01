@@ -1,0 +1,9 @@
+{
+  "mcpServers": {
+    "cardiocode": {
+      "type": "stdio",
+      "command": "python",
+      "args": ["-m", "cardiocode.mcp.server"]
+    }
+  }
+}
